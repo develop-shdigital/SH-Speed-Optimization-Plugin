@@ -20,9 +20,11 @@ test.describe( 'E2E environment (SH Speed Optimizer inactive)', () => {
 		} );
 		expect( res.status(), `GET ${ u.home }` ).toBe( 200 );
 
-		const active = wpCli( [ 'plugin', 'list', '--status=active', '--field=name' ] ).split( /\s+/ );
+		// --skip-plugins: still works if a broken plugin build breaks WP-CLI.
+		const skip = `--skip-plugins=${ PLUGIN_SLUG }`;
+		const active = wpCli( [ 'plugin', 'list', '--status=active', '--field=name', skip ] ).split( /\s+/ );
 		if ( active.includes( PLUGIN_SLUG ) ) {
-			wpCli( [ 'plugin', 'deactivate', PLUGIN_SLUG ] );
+			wpCli( [ 'plugin', 'deactivate', PLUGIN_SLUG, skip ] );
 		}
 	} );
 

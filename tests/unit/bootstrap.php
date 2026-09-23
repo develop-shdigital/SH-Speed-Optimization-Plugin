@@ -28,6 +28,8 @@ if ( ! is_dir( WP_CONTENT_DIR ) ) {
 
 require_once dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 
+// Core WordPress stubs first; area-specific stub files only add missing functions.
+require_once __DIR__ . '/stubs/wordpress.php';
 foreach ( glob( __DIR__ . '/stubs/*.php' ) as $stub ) {
 	require_once $stub;
 }

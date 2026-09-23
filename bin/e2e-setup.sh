@@ -29,7 +29,7 @@ for arg in "$@"; do
 	case "$arg" in
 		--activate-plugin) ACTIVATE_PLUGIN=1 ;;
 		-h|--help)
-			sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
+			sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'
 			exit 0
 			;;
 		*) echo "Unknown argument: $arg" >&2; exit 2 ;;
@@ -87,7 +87,7 @@ download() {
 	local url="$1" dest="$2"
 	if [ -s "$dest" ]; then return 0; fi
 	[ "$SHSO_E2E_OFFLINE" = "1" ] && return 1
-	log "Downloading $url"
+	log "Downloading $url" >&2
 	if curl -fsSL --retry 3 --connect-timeout 20 -o "$dest.part" "$url"; then
 		mv "$dest.part" "$dest"
 		return 0
@@ -1099,7 +1099,8 @@ wp cache flush --quiet >/dev/null 2>&1 || true
 if [ "$ACTIVATE_PLUGIN" = "1" ]; then
 	if [ -f "$WPC/plugins/$PLUGIN_SLUG/$PLUGIN_SLUG.php" ]; then
 		log "Activating $PLUGIN_SLUG"
-		wp plugin activate "$PLUGIN_SLUG"
+		wp plugin activate "$PLUGIN_SLUG" \
+			|| die "Activating $PLUGIN_SLUG failed (see above). The site itself is ready; recover with: php $WP_CLI --allow-root --path=$SHSO_E2E_DIR plugin deactivate $PLUGIN_SLUG --skip-plugins=$PLUGIN_SLUG"
 	else
 		die "--activate-plugin: $SHSO_PLUGIN_SRC/$PLUGIN_SLUG.php does not exist (yet)."
 	fi
@@ -1121,27 +1122,28 @@ VERIFY_STATUS="skipped (server not running - start it with bin/e2e-server.sh sta
 if curl -fsS -o /dev/null --max-time 20 "$SITE_URL/" 2>/dev/null; then
 	log "Server is running - verifying pages"
 	fail=0
-	check() { # <key> <needle>...
-		local key="$1"; shift
+	check() { # <key> <expected HTTP status> <needle>...
+		local key="$1" expect="$2"; shift 2
 		local url body code
 		url="$(php -r '$u = json_decode(file_get_contents($argv[1]), true); echo $u[$argv[2]];' "$URLS_JSON" "$key")"
 		body="$(curl -sS --max-time 60 -w '\n%{http_code}' "$url" || true)"
 		code="${body##*$'\n'}"
-		if [ "$code" != "200" ]; then warn "$key ($url) returned HTTP $code"; fail=1; return; fi
+		if [ "$code" != "$expect" ]; then warn "$key ($url) returned HTTP $code, expected $expect"; fail=1; return; fi
 		for needle in "$@"; do
 			if ! grep -qF -- "$needle" <<<"$body"; then warn "$key ($url) lacks '$needle'"; fail=1; fi
 		done
 	}
-	check home 'shso-hero' 'youtube.com/embed/dQw4w9WgXcQ' 'google.com/maps/embed' 'wpcf7-form' 'shso-gallery'
-	check blog 'Our new performance roadmap'
-	check post 'wp-post-image'
-	check contact 'wpcf7-form'
-	check elementor 'elementor-widget-heading' 'elementor-widget-image' 'elementor-widget-button' 'elementor-widget-video' 'elementor-frontend'
-	check shop 'SH Classic T-Shirt' 'SH Hoodie'
-	check product 'SH Classic T-Shirt'
-	check cart 'wp-block-woocommerce-cart'
-	check checkout 'wp-block-woocommerce-checkout'
-	check myaccount 'woocommerce'
+	check home 200 'shso-hero' 'youtube.com/embed/dQw4w9WgXcQ' 'google.com/maps/embed' 'wpcf7-form' 'shso-gallery' \
+		"href=\"$SITE_URL/elementor-landing/\"" "href=\"$SITE_URL/shop/\"" "href=\"$SITE_URL/cart/\""
+	check blog 200 'Our new performance roadmap' 'wp-post-image'
+	check post 200 'wp-post-image' 'wp-block-comment-template'
+	check contact 200 'wpcf7-form'
+	check elementor 200 'elementor-widget-heading' 'elementor-widget-image' 'elementor-widget-button' 'elementor-widget-video' 'elementor-frontend'
+	check shop 200 'SH Classic T-Shirt' 'SH Hoodie' 'add_to_cart_button'
+	check product 200 'SH Classic T-Shirt' 'single_add_to_cart_button'
+	check cart 200 'wp-block-woocommerce-cart'
+	check checkout 302   # redirects to the cart while the cart is empty
+	check myaccount 200 'woocommerce'
 	if [ "$fail" = "0" ]; then VERIFY_STATUS="all pages OK"; else VERIFY_STATUS="FAILED (see warnings above)"; fi
 fi
 

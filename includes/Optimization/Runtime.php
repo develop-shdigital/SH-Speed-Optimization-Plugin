@@ -111,6 +111,31 @@ final class Runtime {
 	}
 
 	/**
+	 * Re-read the active set after the engine changed it during this request
+	 * (background jobs) and register newly active optimizations, so services
+	 * such as asset generation see the same transforms as future page views.
+	 */
+	public function refresh(): void {
+		$this->active = null;
+		$this->plugin->state()->flush();
+		foreach ( $this->active_ids() as $id ) {
+			if ( isset( $this->booted[ $id ] ) ) {
+				continue;
+			}
+			$optimization = $this->plugin->registry()->get( $id );
+			if ( null === $optimization ) {
+				continue;
+			}
+			try {
+				$optimization->register_runtime( $this );
+				$this->booted[ $id ] = $optimization;
+			} catch ( \Throwable $e ) {
+				$this->plugin->logger()->error( 'Optimization failed to register.', array( 'optimization' => $id, 'error' => $e->getMessage() ), 'engine' );
+			}
+		}
+	}
+
+	/**
 	 * Effective active optimization ids for this request.
 	 *
 	 * @return string[]
@@ -250,7 +275,7 @@ final class Runtime {
 	 * @return array<string,callable>
 	 */
 	public function css_transforms(): array {
-		return self::sorted( $this->css_transforms );
+		return self::sorted( array_filter( $this->css_transforms, fn( $item ) => $this->is_active( $item[1] ) ) );
 	}
 
 	/**
@@ -259,7 +284,7 @@ final class Runtime {
 	 * @return array<string,callable>
 	 */
 	public function js_transforms(): array {
-		return self::sorted( $this->js_transforms );
+		return self::sorted( array_filter( $this->js_transforms, fn( $item ) => $this->is_active( $item[1] ) ) );
 	}
 
 	/**

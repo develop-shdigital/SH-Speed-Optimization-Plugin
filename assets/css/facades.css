@@ -1,0 +1,172 @@
+/*! SH Speed Optimizer - click-to-load video and map placeholders. */
+.shso-facade {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background: #000;
+	color: #fff;
+	line-height: 1.3;
+	cursor: pointer;
+}
+
+.shso-facade *,
+.shso-facade *::before,
+.shso-facade *::after {
+	box-sizing: border-box;
+}
+
+/* Video preview image fills the box without changing its size. */
+.shso-facade__thumb {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	margin: 0 !important;
+	padding: 0;
+	border: 0;
+	object-fit: cover;
+}
+
+.shso-facade__play {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 68px;
+	height: 48px;
+	margin: -24px 0 0 -34px;
+	padding: 0;
+	border: 0;
+	border-radius: 12px;
+	background: none;
+	line-height: 0;
+	cursor: pointer;
+}
+
+.shso-facade__play svg {
+	display: block;
+	width: 68px;
+	height: 48px;
+}
+
+.shso-facade__play-bg {
+	fill: #212121;
+	fill-opacity: 0.8;
+}
+
+.shso-facade:hover .shso-facade__play-bg,
+.shso-facade__play:focus-visible .shso-facade__play-bg {
+	fill: #f00;
+	fill-opacity: 1;
+}
+
+.shso-facade[data-shso-provider="vimeo"]:hover .shso-facade__play-bg,
+.shso-facade[data-shso-provider="vimeo"] .shso-facade__play:focus-visible .shso-facade__play-bg {
+	fill: #00adef;
+}
+
+.shso-facade__play:focus-visible,
+.shso-facade__load:focus-visible,
+.shso-facade__link:focus-visible {
+	outline: 3px solid #fff;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 5px #1a73e8;
+}
+
+/* Map placeholder. */
+.shso-facade--map {
+	background: #e8eaed;
+	color: #202124;
+	cursor: default;
+}
+
+.shso-facade__inner {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6em;
+	padding: 1em;
+	text-align: center;
+}
+
+.shso-facade__pin {
+	width: 40px;
+	height: 40px;
+	fill: #ea4335;
+}
+
+.shso-facade__label {
+	max-width: 100%;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.shso-facade__load {
+	display: inline-block;
+	margin: 0;
+	padding: 0.6em 1.2em;
+	border: 0;
+	border-radius: 4px;
+	background: #1a73e8;
+	color: #fff;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.shso-facade__load:hover {
+	background: #1765cc;
+}
+
+.shso-facade__link {
+	color: #1a0dab;
+	font-size: 0.9em;
+	text-decoration: underline;
+}
+
+.shso-facade--map .shso-facade__link:focus-visible,
+.shso-facade--map .shso-facade__load:focus-visible {
+	outline-color: #202124;
+}
+
+/* Responsive embed wrappers that position the frame absolutely (padding/aspect-ratio boxes). */
+.wp-embed-responsive .wp-has-aspect-ratio .shso-facade,
+.embed-responsive > .shso-facade,
+.ratio > .shso-facade,
+.fluid-width-video-wrapper > .shso-facade,
+.elementor-fit-aspect-ratio .shso-facade {
+	position: absolute !important;
+	top: 0;
+	left: 0;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	aspect-ratio: auto !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.shso-facade__play-bg {
+		transition: fill 0.15s ease, fill-opacity 0.15s ease;
+	}
+}
+
+@media (forced-colors: active) {
+	.shso-facade__play,
+	.shso-facade__load {
+		border: 2px solid ButtonText;
+	}
+}

@@ -77,7 +77,7 @@ final class Plugin {
 		$this->boot_verification_request();
 
 		add_action( 'plugins_loaded', array( Installer::class, 'maybe_upgrade' ), 0 );
-		add_action( 'plugins_loaded', array( $this->runtime(), 'boot' ), 1 );
+		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), 1 );
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 
 		// Background processing.
@@ -93,6 +93,7 @@ final class Plugin {
 		add_action( 'admin_post_shso_bar_action', array( $this, 'admin_bar_action' ) );
 
 		if ( is_admin() ) {
+			\SH\SpeedOptimizer\Admin\HarnessAssets::register();
 			( new \SH\SpeedOptimizer\Admin\Admin( $this ) )->register();
 		}
 
@@ -142,6 +143,21 @@ final class Plugin {
 		}
 		if ( ! empty( $verification['p'] ) ) {
 			\SH\SpeedOptimizer\Diagnostics\BrowserProbe::attach( $this, $verification );
+		}
+	}
+
+	/**
+	 * All plugins are loaded: register compatibility integrations and boot the runtime.
+	 */
+	public function on_plugins_loaded(): void {
+		if ( class_exists( '\SH\SpeedOptimizer\Modules\Compatibility\CompatibilityModule' ) ) {
+			\SH\SpeedOptimizer\Modules\Compatibility\CompatibilityModule::register();
+		}
+
+		$this->runtime()->boot();
+
+		if ( $this->context()->is_frontend_request() ) {
+			\SH\SpeedOptimizer\Diagnostics\Rum::register( $this );
 		}
 	}
 
@@ -196,6 +212,11 @@ final class Plugin {
 	 */
 	public function on_daily(): void {
 		$this->metrics()->prune();
+		try {
+			$this->database()->daily_maintenance();
+		} catch ( \Throwable $e ) {
+			$this->logger()->error( 'Database maintenance failed.', array( 'error' => $e->getMessage() ), 'database' );
+		}
 		if ( ! Context::is_emergency_safe_mode() ) {
 			$this->engine()->schedule_health_check();
 		}

@@ -176,7 +176,7 @@ status() {
 	local code
 	code="$(http_code)"
 	if is_running; then
-		log "Running (pid $(read_pid), workers $(pgrep -f -- "-S ${HOST}:${SHSO_E2E_PORT} " | wc -l | tr -d ' ') processes) on $URL - GET / -> HTTP $code"
+		log "Running on $URL (pid $(read_pid), $(pgrep -f -- "-S ${HOST}:${SHSO_E2E_PORT} " | wc -l | tr -d ' ') php processes = master + workers) - GET / -> HTTP $code"
 		log "Docroot $SHSO_E2E_DIR, log $LOG_FILE"
 		[ "$code" = "200" ]
 	else

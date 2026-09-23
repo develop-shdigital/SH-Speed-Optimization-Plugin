@@ -123,23 +123,58 @@ function content() {
 }
 
 /**
+ * Console noise that is caused by the environment, not by the site:
+ * third-party resources (YouTube, Google Fonts, Gravatar, s.w.org emoji) that
+ * fail to load when outbound HTTPS is blocked or TLS-intercepted.
+ * Pass to collectConsoleErrors( page, { ignore: THIRD_PARTY_NETWORK_NOISE } ).
+ */
+const THIRD_PARTY_NETWORK_NOISE = [
+	/^console\.error: Failed to load resource: net::ERR_[A-Z_]+ \((?!https?:\/\/(127\.0\.0\.1|localhost)[:/])/,
+];
+
+/**
  * Collect uncaught page errors and console.error() messages.
  * Returns an array that fills over time.
  *
  * @param {import('@playwright/test').Page} page
+ * @param {{ ignore?: RegExp[] }} [options] messages matching any pattern are skipped
  * @returns {string[]}
  */
-function collectConsoleErrors( page ) {
+function collectConsoleErrors( page, options = {} ) {
+	const ignore = options.ignore || [];
 	/** @type {string[]} */
 	const errors = [];
-	page.on( 'pageerror', ( err ) => errors.push( `pageerror: ${ err.message }` ) );
+	const push = ( /** @type {string} */ msg ) => {
+		if ( ! ignore.some( ( re ) => re.test( msg ) ) ) {
+			errors.push( msg );
+		}
+	};
+	page.on( 'pageerror', ( err ) => push( `pageerror: ${ err.message }` ) );
 	page.on( 'console', ( msg ) => {
 		if ( msg.type() === 'error' ) {
 			const loc = msg.location();
-			errors.push( `console.error: ${ msg.text() }${ loc && loc.url ? ` (${ loc.url }:${ loc.lineNumber })` : '' }` );
+			push( `console.error: ${ msg.text() }${ loc && loc.url ? ` (${ loc.url }:${ loc.lineNumber })` : '' }` );
 		}
 	} );
 	return errors;
+}
+
+/**
+ * Abort every request that does not go to the E2E site itself (YouTube,
+ * Google Maps/Fonts, Gravatar, ...). Makes page loads fast and deterministic
+ * without internet access. `page.on('request')` still sees the attempts.
+ *
+ * @param {import('@playwright/test').Page|import('@playwright/test').BrowserContext} target
+ */
+async function blockExternalRequests( target ) {
+	const site = new URL( BASE_URL );
+	await target.route( '**/*', ( route ) => {
+		const url = new URL( route.request().url() );
+		if ( url.host === site.host || url.protocol === 'data:' || url.protocol === 'blob:' ) {
+			return route.continue();
+		}
+		return route.abort( 'blockedbyclient' );
+	} );
 }
 
 module.exports = {
@@ -148,6 +183,8 @@ module.exports = {
 	urls,
 	content,
 	collectConsoleErrors,
+	blockExternalRequests,
+	THIRD_PARTY_NETWORK_NOISE,
 	E2E_DIR,
 	E2E_ROOT,
 	WP_CLI,
