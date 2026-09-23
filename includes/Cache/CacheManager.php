@@ -88,6 +88,7 @@ final class CacheManager {
 	 * @return int Deleted cache files.
 	 */
 	public function purge_all( string $reason = '' ): int {
+		$this->mark_purged();
 		$count = $this->delete_site_files();
 		delete_transient( self::USAGE_TRANSIENT );
 
@@ -120,6 +121,7 @@ final class CacheManager {
 	 * @return int Deleted cache files.
 	 */
 	public function purge_url( string $url ): int {
+		$this->mark_purged();
 		$count = $this->delete_url( $url );
 
 		/** This action is documented in includes/Cache/CacheManager.php */
@@ -159,6 +161,9 @@ final class CacheManager {
 	public function purge_urls( array $urls, string $scope = 'url' ): int {
 		$urls  = array_values( array_unique( array_filter( array_map( 'strval', $urls ) ) ) );
 		$count = 0;
+		if ( ! empty( $urls ) ) {
+			$this->mark_purged();
+		}
 		foreach ( $urls as $url ) {
 			$count += $this->delete_url( $url );
 		}
@@ -169,6 +174,37 @@ final class CacheManager {
 		$this->preloader()->enqueue( array_slice( $urls, 0, 10 ) );
 
 		return $count;
+	}
+
+	/**
+	 * Remember when this site was last purged (written before deleting, so a page
+	 * that started rendering before the purge is never stored afterwards).
+	 */
+	private function mark_purged(): void {
+		$prefix = $this->site_prefix();
+		$fs     = $this->plugin->filesystem();
+		$dir    = $fs->cache_dir( 'config' );
+		foreach ( $this->hosts() as $host ) {
+			$fs->write( $dir . Delivery::site_key( $host, $prefix ) . '.purged.txt', sprintf( '%.6F', microtime( true ) ) );
+		}
+	}
+
+	/**
+	 * Whether the site of a request was purged at or after a time (the render may be outdated).
+	 *
+	 * @param string $site_key Site key of the request.
+	 * @param float  $time     Request start (Unix time with microseconds).
+	 */
+	public function purged_since( string $site_key, float $time ): bool {
+		if ( ! preg_match( '/^[a-z0-9._+~-]+$/', $site_key ) ) {
+			return false;
+		}
+		$marker = Filesystem::cache_root() . 'config/' . $site_key . '.purged.txt';
+		if ( ! is_file( $marker ) ) {
+			return false;
+		}
+		$purged = @file_get_contents( $marker ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents,WordPress.PHP.NoSilencedErrors.Discouraged -- Tiny local marker file.
+		return is_string( $purged ) && (float) $purged >= $time;
 	}
 
 	/**

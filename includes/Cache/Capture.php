@@ -147,6 +147,13 @@ final class Capture {
 			$reason = 'filter';
 		}
 
+		// The cache was purged while this page was rendering: its content may already be outdated.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$started = isset( $_SERVER['REQUEST_TIME_FLOAT'] ) ? (float) $_SERVER['REQUEST_TIME_FLOAT'] : microtime( true );
+		if ( '' === $reason && $this->cache->purged_since( (string) ( $this->decision['site_key'] ?? '' ), $started ) ) {
+			$reason = 'purged_during_render';
+		}
+
 		if ( '' === $reason ) {
 			$body = $html;
 			if ( defined( 'SHSO_DEBUG' ) && SHSO_DEBUG ) {
