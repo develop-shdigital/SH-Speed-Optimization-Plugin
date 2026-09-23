@@ -16,6 +16,8 @@ use SH\SpeedOptimizer\Security\Signer;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Uses the core filter https_local_ssl_verify like WordPress' own loopbacks.
+
 /**
  * Loopback HTTP client.
  */
@@ -129,10 +131,10 @@ final class Loopback {
 	/**
 	 * Request via cURL.
 	 *
-	 * @param string                $url     URL.
-	 * @param array<string,mixed>   $args    Args.
-	 * @param array<string,string>  $headers Headers.
-	 * @param array<string,mixed>   $result  Result template.
+	 * @param string               $url     URL.
+	 * @param array<string,mixed>  $args    Args.
+	 * @param array<string,string> $headers Headers.
+	 * @param array<string,mixed>  $result  Result template.
 	 * @return array<string,mixed>
 	 */
 	private static function curl( string $url, array $args, array $headers, array $result ): array {
@@ -140,7 +142,7 @@ final class Loopback {
 		$body             = '';
 		$max              = (int) $args['max_bytes'];
 
-		$ch = curl_init(); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_init
+		$ch           = curl_init(); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_init
 		$header_lines = array();
 		foreach ( $headers as $name => $value ) {
 			$header_lines[] = $name . ': ' . $value;
@@ -238,11 +240,11 @@ final class Loopback {
 				'user-agent'          => self::USER_AGENT,
 				'headers'             => $headers,
 				'cookies'             => $cookies,
-				'sslverify'           => (bool) apply_filters( 'https_local_ssl_verify', false ),
+				'sslverify'           => (bool) apply_filters( 'https_local_ssl_verify', false ), // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core filter.
 				'limit_response_size' => (int) $args['max_bytes'],
 			)
 		);
-		$elapsed = (int) round( 1000 * ( microtime( true ) - $start ) );
+		$elapsed  = (int) round( 1000 * ( microtime( true ) - $start ) );
 
 		if ( is_wp_error( $response ) ) {
 			$result['error']   = $response->get_error_message();

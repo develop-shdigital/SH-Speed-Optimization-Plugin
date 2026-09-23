@@ -89,8 +89,8 @@ final class Assessment {
 	 * @param string $reason Why.
 	 */
 	public static function not_applicable( string $reason ): self {
-		$a             = self::make( false, 100, self::BENEFIT_NONE );
-		$a->reasons[]  = $reason;
+		$a            = self::make( false, 100, self::BENEFIT_NONE );
+		$a->reasons[] = $reason;
 		return $a;
 	}
 

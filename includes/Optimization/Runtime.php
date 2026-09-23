@@ -130,7 +130,14 @@ final class Runtime {
 				$optimization->register_runtime( $this );
 				$this->booted[ $id ] = $optimization;
 			} catch ( \Throwable $e ) {
-				$this->plugin->logger()->error( 'Optimization failed to register.', array( 'optimization' => $id, 'error' => $e->getMessage() ), 'engine' );
+				$this->plugin->logger()->error(
+					'Optimization failed to register.',
+					array(
+						'optimization' => $id,
+						'error'        => $e->getMessage(),
+					),
+					'engine'
+				);
 			}
 		}
 	}

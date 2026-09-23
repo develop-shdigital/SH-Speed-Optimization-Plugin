@@ -82,8 +82,7 @@ final class ImageDimensionsOptimization extends AbstractOptimization {
 		if ( $missing <= 0 ) {
 			return $this->finalize(
 				Assessment::not_applicable( __( 'All images on the analysed pages already declare their size.', 'sh-speed-optimizer' ) ),
-				$context,
-				'image_optimization'
+				$context
 			);
 		}
 
@@ -98,7 +97,7 @@ final class ImageDimensionsOptimization extends AbstractOptimization {
 		);
 		$assessment->note( __( 'Only images stored on this site are changed, and only when their exact size is known.', 'sh-speed-optimizer' ) );
 
-		return $this->finalize( $assessment, $context, 'image_optimization' );
+		return $this->finalize( $assessment, $context );
 	}
 
 	/**

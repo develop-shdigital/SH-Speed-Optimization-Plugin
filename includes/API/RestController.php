@@ -579,8 +579,8 @@ final class RestController {
 		$groups    = array();
 
 		foreach ( $this->plugin->registry()->by_category() as $category => $optimizations ) {
-			$items        = array();
-			$counts       = array(
+			$items  = array();
+			$counts = array(
 				'active'    => 0,
 				'attention' => 0,
 				'handled'   => 0,
@@ -633,25 +633,25 @@ final class RestController {
 				}
 
 				$items[] = array(
-					'id'           => $id,
-					'name'         => $optimization->name(),
-					'description'  => $optimization->description(),
-					'category'     => $category,
-					'risk'         => $optimization->risk(),
-					'risk_label'   => Risk::label( $optimization->risk() ),
-					'level'        => $optimization->level(),
-					'level_label'  => Risk::level_label( $optimization->level() ),
-					'reversible'   => $optimization->is_reversible(),
-					'state'        => $item_state,
-					'source'       => $state['active'][ $id ]['source'] ?? null,
-					'verified'     => $state['active'][ $id ]['verified'] ?? null,
-					'since'        => isset( $state['active'][ $id ]['since'] ) ? (int) $state['active'][ $id ]['since'] : null,
-					'override'     => $overrides[ $id ] ?? null,
-					'decision'     => $decision,
-					'handled_by'   => $assess['handled_by'] ?? null,
-					'details'      => $details,
-					'requirements' => $optimization->requirements(),
-					'experimental' => $experimental,
+					'id'              => $id,
+					'name'            => $optimization->name(),
+					'description'     => $optimization->description(),
+					'category'        => $category,
+					'risk'            => $optimization->risk(),
+					'risk_label'      => Risk::label( $optimization->risk() ),
+					'level'           => $optimization->level(),
+					'level_label'     => Risk::level_label( $optimization->level() ),
+					'reversible'      => $optimization->is_reversible(),
+					'state'           => $item_state,
+					'source'          => $state['active'][ $id ]['source'] ?? null,
+					'verified'        => $state['active'][ $id ]['verified'] ?? null,
+					'since'           => isset( $state['active'][ $id ]['since'] ) ? (int) $state['active'][ $id ]['since'] : null,
+					'override'        => $overrides[ $id ] ?? null,
+					'decision'        => $decision,
+					'handled_by'      => $assess['handled_by'] ?? null,
+					'details'         => $details,
+					'requirements'    => $optimization->requirements(),
+					'experimental'    => $experimental,
 					'page_exclusions' => $this->plugin->state()->page_exclusions( $id ),
 				);
 			}
@@ -886,7 +886,7 @@ final class RestController {
 					continue;
 				}
 				foreach ( $latest[ $group ] as $metric => $value ) {
-					$format                        = 'tbt' === $metric ? 'inp' : (string) $metric;
+					$format                      = 'tbt' === $metric ? 'inp' : (string) $metric;
 					$latest[ $group ][ $metric ] = \SH\SpeedOptimizer\Diagnostics\Metrics::format( $format, null === $value ? null : (float) $value );
 				}
 			}

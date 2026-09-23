@@ -16,7 +16,7 @@ namespace SH\SpeedOptimizer\Assets\Fonts;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * @font-face transformer.
+ * Transformer for @font-face rules.
  */
 final class FontFaceTransformer {
 

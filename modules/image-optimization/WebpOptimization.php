@@ -283,6 +283,8 @@ final class WebpOptimization extends AbstractOptimization {
 				$queue->pause( '' );
 			}
 
+			// Create the derivative directory with its protection files (no directory listing).
+			$this->plugin->filesystem()->uploads_dir( 'webp', true );
 			$converter = $this->converter();
 			$processed = $queue->run(
 				static function ( int $id ) use ( $converter ) {
@@ -302,8 +304,11 @@ final class WebpOptimization extends AbstractOptimization {
 			$this->plugin->logger()->debug( 'WebP batch processed.', array( 'attachments' => $processed ), 'images' );
 
 			if ( $queue->has_work() ) {
-				$paused = '' !== (string) $queue->state()['paused'];
-				Scheduler::async( self::CRON_HOOK, array(), $paused ? 6 * HOUR_IN_SECONDS : 30 );
+				$delay = 0 === $processed ? 5 * MINUTE_IN_SECONDS : 30;
+				if ( '' !== (string) $queue->state()['paused'] ) {
+					$delay = 6 * HOUR_IN_SECONDS;
+				}
+				Scheduler::async( self::CRON_HOOK, array(), $delay );
 			}
 		} catch ( \Throwable $e ) {
 			$this->plugin->logger()->error( 'WebP conversion batch failed.', array( 'error' => $e->getMessage() ), 'images' );

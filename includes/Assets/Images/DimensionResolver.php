@@ -269,7 +269,7 @@ final class DimensionResolver {
 	}
 
 	/**
-	 * getimagesize() on a file that must resolve inside one of the allowed roots.
+	 * Measure a file with getimagesize(); it must resolve inside one of the allowed roots.
 	 *
 	 * @param string   $path  Path.
 	 * @param string[] $roots Allowed directories.

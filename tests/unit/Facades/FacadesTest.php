@@ -52,6 +52,7 @@ final class FacadesTest extends TestCase {
 		$this->assertSame( 1, $result['count'] );
 		$this->assertStringNotContainsString( '<iframe', $html );
 		$this->assertStringNotContainsString( '<script>alert(1)', $html );
+		$this->assertStringNotContainsString( '<div', $html, 'Only phrasing content: valid inside <p>.' );
 		$this->assertStringContainsString( 'class="shso-facade shso-facade--video yt embed-responsive-item"', $html );
 		$this->assertStringContainsString( 'data-shso-src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=Xy&amp;start=42&amp;autoplay=1"', $html );
 		$this->assertStringContainsString( 'style="width:560px;max-width:100%;aspect-ratio:560/315;border:0;"', $html );
@@ -61,7 +62,7 @@ final class FacadesTest extends TestCase {
 		$this->assertStringContainsString( '<noscript><a class="shso-facade__link" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&amp;t=42s"', $html );
 
 		// The original attributes survive as JSON for facades.js.
-		$tag = Tag::parse( (string) preg_replace( '#^.*?(<div class="shso-facade[^>]*>).*$#s', '$1', $html ) );
+		$tag = Tag::parse( (string) preg_replace( '#^.*?(<span class="shso-facade[^>]*>).*$#s', '$1', $html ) );
 		$this->assertNotNull( $tag );
 		$attributes = json_decode( (string) $tag->get( 'data-shso-iframe' ), true );
 		$this->assertSame( '560', $attributes['width'] );

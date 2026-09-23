@@ -288,15 +288,15 @@ final class ConversionQueue {
 	/**
 	 * Apply a statistics delta.
 	 *
-	 * @param array<string,int> $stats   Stats.
-	 * @param array<string,int> $old     Old totals.
-	 * @param array<string,int> $new     New totals.
-	 * @param bool              $is_new  Attachment processed for the first time.
+	 * @param array<string,int> $stats  Stats.
+	 * @param array<string,int> $before Old totals.
+	 * @param array<string,int> $after  New totals.
+	 * @param bool              $is_new Attachment processed for the first time.
 	 * @return array<string,int>
 	 */
-	private static function apply_delta( array $stats, array $old, array $new, bool $is_new ): array {
+	private static function apply_delta( array $stats, array $before, array $after, bool $is_new ): array {
 		foreach ( array( 'converted', 'skipped', 'errors', 'bytes_original', 'bytes_webp' ) as $key ) {
-			$stats[ $key ] = max( 0, (int) ( $stats[ $key ] ?? 0 ) - (int) $old[ $key ] + (int) $new[ $key ] );
+			$stats[ $key ] = max( 0, (int) ( $stats[ $key ] ?? 0 ) - (int) $before[ $key ] + (int) $after[ $key ] );
 		}
 		if ( $is_new ) {
 			$stats['attachments'] = (int) ( $stats['attachments'] ?? 0 ) + 1;

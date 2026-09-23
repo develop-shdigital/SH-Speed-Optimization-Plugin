@@ -3,7 +3,8 @@
  * Shared helpers for video and map facades (pure).
  *
  * A facade is a lightweight placeholder with the same size as the embedded
- * frame it replaces. The original frame's attributes are stored as JSON in
+ * frame it replaces. It only contains phrasing content (a display:block
+ * <span> wrapper), so it stays valid where the iframe sat inside a <p>. The original frame's attributes are stored as JSON in
  * `data-shso-iframe` and restored by assets/js/facades.js on click. All
  * attribute values are escaped through {@see Tag::set()} and all text
  * through esc_html().
@@ -227,14 +228,14 @@ final class Facades {
 	 *
 	 * @param string|null    $width   Width attribute.
 	 * @param string|null    $height  Height attribute.
-	 * @param array<int,int> $default Default ratio [ w, h ].
+	 * @param array<int,int> $fallback Default ratio [ w, h ].
 	 * @return array{ratio:array{0:int,1:int},width:int,height:int,fluid:bool}
 	 */
-	public static function aspect( ?string $width, ?string $height, array $default ): array {
+	public static function aspect( ?string $width, ?string $height, array $fallback ): array {
 		$w = self::pixels( $width );
 		$h = self::pixels( $height );
 		return array(
-			'ratio'  => $w > 0 && $h > 0 ? array( $w, $h ) : array( (int) $default[0], (int) $default[1] ),
+			'ratio'  => $w > 0 && $h > 0 ? array( $w, $h ) : array( (int) $fallback[0], (int) $fallback[1] ),
 			'width'  => $w,
 			'height' => $h,
 			'fluid'  => null !== $width && (bool) preg_match( '/^\s*\d+(?:\.\d+)?%\s*$/', $width ),
@@ -257,7 +258,7 @@ final class Facades {
 	}
 
 	/**
-	 * Wrapper element shared by all facades.
+	 * Wrapper element shared by all facades (a <span> styled as a block).
 	 *
 	 * @param string $kind  video|map.
 	 * @param Tag    $frame Original iframe.
@@ -285,7 +286,7 @@ final class Facades {
 		}
 
 		return Tag::create(
-			'div',
+			'span',
 			array(
 				'class'              => implode( ' ', array_unique( $classes ) ),
 				'data-shso-provider' => $provider,
@@ -351,7 +352,7 @@ final class Facades {
 			. $img->to_html()
 			. $button->to_html() . self::play_icon() . '</button>'
 			. '<noscript>' . $anchor->to_html() . esc_html( $link ) . '</a></noscript>'
-			. '</div>';
+			. '</span>';
 	}
 
 	/**
@@ -393,7 +394,7 @@ final class Facades {
 			. $label
 			. $button->to_html() . esc_html__( 'Load map', 'sh-speed-optimizer' ) . '</button>'
 			. $anchor->to_html() . esc_html__( 'Open in Google Maps', 'sh-speed-optimizer' ) . '</a>'
-			. '</span></div>';
+			. '</span></span>';
 	}
 
 	/**
@@ -426,9 +427,11 @@ final class Facades {
 	 */
 	public static function inject_assets( HtmlDocument $doc, string $css_url, string $js_url ): void {
 		if ( ! $doc->contains( 'id="shso-facades-css"' ) ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- Injected into the final HTML only on pages that got a facade.
 			$doc->insert_in_head( '<link rel="stylesheet" id="shso-facades-css" href="' . esc_url( $css_url ) . '" media="all">' );
 		}
 		if ( ! $doc->contains( 'id="shso-facades-js"' ) ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript -- Injected into the final HTML only on pages that got a facade.
 			$doc->insert_before_body_end( '<script id="shso-facades-js" src="' . esc_url( $js_url ) . '" defer></script>' );
 		}
 	}

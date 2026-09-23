@@ -132,7 +132,7 @@ final class Plugin {
 			'init',
 			static function () {
 				if ( ! defined( 'DONOTCACHEPAGE' ) ) {
-					define( 'DONOTCACHEPAGE', true );
+					define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard cross-plugin constant.
 				}
 			},
 			0

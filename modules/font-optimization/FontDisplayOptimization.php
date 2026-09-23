@@ -1,6 +1,6 @@
 <?php
 /**
- * font-display: swap for web fonts (text stays visible while fonts load).
+ * Font display swap: text stays visible while web fonts load.
  *
  * @package SH\SpeedOptimizer
  */

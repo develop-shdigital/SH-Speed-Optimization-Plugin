@@ -203,7 +203,7 @@ final class FindingsBuilder {
 	/**
 	 * Server and WordPress environment.
 	 *
-	 * @param array<string,mixed>             $profile Profile.
+	 * @param array<string,mixed>                   $profile Profile.
 	 * @param array<int|string,array<string,mixed>> $pages   Pages.
 	 */
 	private function server( array $profile, array $pages ): void {
@@ -955,7 +955,7 @@ final class FindingsBuilder {
 			}
 			// Do not duplicate a finding that already points to this optimization.
 			foreach ( $this->findings as $finding ) {
-				if ( $id === ( $finding['optimization'] ?? null ) ) {
+				if ( ( $finding['optimization'] ?? null ) === $id ) {
 					continue 2;
 				}
 			}

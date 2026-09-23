@@ -117,7 +117,8 @@ final class Logger {
 		}
 
 		foreach ( (array) $rows as &$row ) {
-			$row['context'] = json_decode( (string) $row['context'], true ) ?: array();
+			$decoded        = json_decode( (string) $row['context'], true );
+			$row['context'] = is_array( $decoded ) ? $decoded : array();
 		}
 
 		return (array) $rows;

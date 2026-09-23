@@ -30,7 +30,7 @@ final class Storage {
 	/**
 	 * Maximum variant files per page directory (protects against variant explosion).
 	 */
-	public const MAX_VARIANTS = 64;
+	public const MAX_VARIANTS = 200;
 
 	/**
 	 * Sub directories of a page directory purged together with the page (pagination, comment pages, AMP).

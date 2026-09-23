@@ -198,7 +198,14 @@ final class SnapshotManager {
 				try {
 					$optimization->rollback();
 				} catch ( \Throwable $e ) {
-					$this->plugin->logger()->error( 'Rollback during restore failed.', array( 'optimization' => $optimization_id, 'error' => $e->getMessage() ), 'rollback' );
+					$this->plugin->logger()->error(
+						'Rollback during restore failed.',
+						array(
+							'optimization' => $optimization_id,
+							'error'        => $e->getMessage(),
+						),
+						'rollback'
+					);
 				}
 			}
 		}

@@ -105,16 +105,15 @@ class DisableEmojisOptimization extends AbstractOptimization {
 			return;
 		}
 
-		add_filter( 'emoji_svg_url', '__return_false' );
-		add_filter( 'wp_resource_hints', array( self::class, 'filter_resource_hints' ), 10, 2 );
-		add_filter( 'tiny_mce_plugins', array( self::class, 'filter_tinymce_plugins' ) );
-
 		add_action(
 			'wp',
 			function () use ( $runtime ) {
 				if ( ! $runtime->is_active_on_page( $this->id() ) ) {
 					return;
 				}
+				add_filter( 'emoji_svg_url', '__return_false' );
+				add_filter( 'wp_resource_hints', array( self::class, 'filter_resource_hints' ), 10, 2 );
+				add_filter( 'tiny_mce_plugins', array( self::class, 'filter_tinymce_plugins' ) );
 				remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
 				remove_action( 'embed_head', 'print_emoji_detection_script' );
 				remove_action( 'wp_print_styles', 'print_emoji_styles' );

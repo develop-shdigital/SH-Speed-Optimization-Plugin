@@ -157,7 +157,7 @@ final class PageSpeed {
 	 */
 	public static function latest( ?string $strategy = null ): ?array {
 		foreach ( array_reverse( self::history() ) as $result ) {
-			if ( null === $strategy || $strategy === ( $result['strategy'] ?? '' ) ) {
+			if ( null === $strategy || ( $result['strategy'] ?? '' ) === $strategy ) {
 				return $result;
 			}
 		}
@@ -229,7 +229,7 @@ final class PageSpeed {
 				}
 				return 'cls' === $metric || 'tbt' === $metric ? ( 'cls' === $metric ? number_format_i18n( (float) $value, 2 ) : Metrics::format( 'inp', (float) $value )['display'] ) : Metrics::format( $metric, (float) $value )['display'];
 			};
-			$rows[]  = array(
+			$rows[] = array(
 				'metric'        => $metric,
 				'label'         => $label,
 				'before'        => $format( $b ),

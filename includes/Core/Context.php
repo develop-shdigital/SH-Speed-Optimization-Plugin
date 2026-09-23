@@ -86,7 +86,7 @@ final class Context {
 			return true;
 		}
 		$prefix = function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json';
-		return false !== strpos( $uri, '/' . $prefix . '/' ) || str_ends_with( strtok( $uri, '?' ) ?: '', '/' . $prefix );
+		return false !== strpos( $uri, '/' . $prefix . '/' ) || str_ends_with( (string) strtok( $uri, '?' ), '/' . $prefix );
 	}
 
 	/**

@@ -347,6 +347,7 @@ final class FontLocalizer {
 			$response
 		);
 		if ( 200 !== (int) $response['status'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Stored as a status note, escaped when displayed.
 			throw new \RuntimeException( '' !== $response['error'] ? 'Download failed: ' . $response['error'] : 'Download failed with HTTP status ' . (int) $response['status'] . '.' );
 		}
 		if ( strlen( (string) $response['body'] ) > $max_bytes || '' === (string) $response['body'] ) {

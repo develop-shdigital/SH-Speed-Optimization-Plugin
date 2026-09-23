@@ -195,7 +195,7 @@ final class GoogleFonts {
 		$out = array();
 		foreach ( explode( '|', $value ) as $spec ) {
 			$bits   = explode( ':', $spec, 3 );
-			$family = self::family_name( $bits[0] );
+			$family = self::clean_family( $bits[0] );
 			if ( '' === $family ) {
 				continue;
 			}
@@ -237,7 +237,7 @@ final class GoogleFonts {
 	 */
 	private static function parse_css2_family( string $value ): ?array {
 		$bits   = explode( ':', $value, 2 );
-		$family = self::family_name( $bits[0] );
+		$family = self::clean_family( $bits[0] );
 		if ( '' === $family ) {
 			return null;
 		}
@@ -272,7 +272,7 @@ final class GoogleFonts {
 	 *
 	 * @param string $name Raw name.
 	 */
-	private static function family_name( string $name ): string {
+	private static function clean_family( string $name ): string {
 		return trim( (string) preg_replace( '/\s+/', ' ', str_replace( '+', ' ', $name ) ) );
 	}
 

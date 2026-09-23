@@ -240,7 +240,7 @@ final class PageAnalyzer {
 			static function ( Tag $tag, string $code, array $info ) use ( $registry, &$analysis, &$seen_tp, &$globals ) {
 				$type = strtolower( (string) $tag->get( 'type' ) );
 				if ( '' !== $type && ! in_array( $type, array( 'text/javascript', 'application/javascript', 'module', 'text/ecmascript' ), true ) ) {
-					return null; // JSON, templates, speculation rules …
+					return null; // JSON, templates, speculation rules and similar.
 				}
 
 				$src = (string) $tag->get( 'src' );
@@ -257,7 +257,7 @@ final class PageAnalyzer {
 					}
 					$match = self::third_party_inline( $code );
 					if ( null !== $match && ! isset( $seen_tp[ $match['id'] ] ) ) {
-						$seen_tp[ $match['id'] ]     = true;
+						$seen_tp[ $match['id'] ]   = true;
 						$analysis['third_party'][] = array_merge(
 							$match,
 							array(
@@ -283,29 +283,29 @@ final class PageAnalyzer {
 				$module   = 'module' === $type;
 
 				$analysis['scripts'][] = array(
-					'handle'       => $handle,
-					'src'          => $src,
-					'local'        => $local,
-					'in_head'      => (bool) $info['in_head'],
-					'async'        => $async,
-					'defer'        => $defer,
-					'module'       => $module,
-					'bytes'        => $resolved['bytes'] ?? null,
-					'minified'     => $resolved['minified'] ?? ( false !== strpos( $src, '.min.js' ) ),
-					'source'       => array(
+					'handle'          => $handle,
+					'src'             => $src,
+					'local'           => $local,
+					'in_head'         => (bool) $info['in_head'],
+					'async'           => $async,
+					'defer'           => $defer,
+					'module'          => $module,
+					'bytes'           => $resolved['bytes'] ?? null,
+					'minified'        => $resolved['minified'] ?? ( false !== strpos( $src, '.min.js' ) ),
+					'source'          => array(
 						'type' => $resolved['source_type'] ?? ( $local ? 'other' : 'external' ),
 						'slug' => $resolved['source_slug'] ?? (string) wp_parse_url( $src, PHP_URL_HOST ),
 						'name' => $resolved['source_name'] ?? (string) wp_parse_url( $src, PHP_URL_HOST ),
 					),
-					'deps'         => null !== $handle ? (array) $registry[ $handle ]['deps'] : array(),
-					'inline_after' => null !== $handle && ! empty( $registry[ $handle ]['inline_after'] ),
+					'deps'            => null !== $handle ? (array) $registry[ $handle ]['deps'] : array(),
+					'inline_after'    => null !== $handle && ! empty( $registry[ $handle ]['inline_after'] ),
 					'render_blocking' => (bool) $info['in_head'] && ! $async && ! $defer && ! $module,
 				);
 
 				if ( ! $local ) {
 					$match = self::third_party_url( $src );
 					if ( null !== $match && ! isset( $seen_tp[ $match['id'] ] ) ) {
-						$seen_tp[ $match['id'] ]     = true;
+						$seen_tp[ $match['id'] ]   = true;
 						$analysis['third_party'][] = array_merge(
 							$match,
 							array(
@@ -353,7 +353,7 @@ final class PageAnalyzer {
 							$families = array();
 						}
 					}
-					$query                        = (string) wp_parse_url( $href, PHP_URL_QUERY );
+					$query                         = (string) wp_parse_url( $href, PHP_URL_QUERY );
 					$analysis['fonts']['google'][] = array(
 						'url'      => $href,
 						'families' => $families,
@@ -559,23 +559,23 @@ final class PageAnalyzer {
 		return (array) apply_filters(
 			'shso_markup_signatures',
 			array(
-				'contact-form-7'    => 'wpcf7',
-				'wpforms-lite'      => 'wpforms-container',
-				'wpforms'           => 'wpforms-container',
-				'gravityforms'      => 'gform_wrapper',
-				'ninja-forms'       => 'nf-form-cont',
-				'fluentform'        => 'fluentform',
-				'formidable'        => 'frm_forms',
-				'forminator'        => 'forminator-custom-form',
-				'mailchimp-for-wp'  => 'mc4wp-form',
-				'revslider'         => 'rs-module',
-				'smart-slider-3'    => 'n2-section-smartslider',
-				'LayerSlider'       => 'ls-container',
-				'ml-slider'         => 'metaslider',
-				'wp-google-maps'    => 'wpgmza_map',
-				'tablepress'        => 'tablepress',
+				'contact-form-7'      => 'wpcf7',
+				'wpforms-lite'        => 'wpforms-container',
+				'wpforms'             => 'wpforms-container',
+				'gravityforms'        => 'gform_wrapper',
+				'ninja-forms'         => 'nf-form-cont',
+				'fluentform'          => 'fluentform',
+				'formidable'          => 'frm_forms',
+				'forminator'          => 'forminator-custom-form',
+				'mailchimp-for-wp'    => 'mc4wp-form',
+				'revslider'           => 'rs-module',
+				'smart-slider-3'      => 'n2-section-smartslider',
+				'LayerSlider'         => 'ls-container',
+				'ml-slider'           => 'metaslider',
+				'wp-google-maps'      => 'wpgmza_map',
+				'tablepress'          => 'tablepress',
 				'the-events-calendar' => 'tribe-events',
-				'bbpress'           => 'bbpress-forums',
+				'bbpress'             => 'bbpress-forums',
 			)
 		);
 	}

@@ -164,8 +164,13 @@ class Environment {
 			}
 		}
 
-		$this->paths[ $page_id ] = array_values( array_unique( $uris ) );
-		return $this->paths[ $page_id ];
+		$uris = array_values( array_unique( $uris ) );
+
+		// Multilingual plugins finish loading after `plugins_loaded`; remember results only once they are ready.
+		if ( function_exists( 'did_action' ) && did_action( 'after_setup_theme' ) ) {
+			$this->paths[ $page_id ] = $uris;
+		}
+		return $uris;
 	}
 
 	/**

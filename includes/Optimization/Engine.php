@@ -422,7 +422,10 @@ final class Engine implements JobHandlerInterface {
 		$start = microtime( true );
 
 		foreach ( (array) $job->get( 'pages', array() ) as $page ) {
-			foreach ( array( 'styles' => 'css', 'scripts' => 'js' ) as $key => $type ) {
+			foreach ( array(
+				'styles'  => 'css',
+				'scripts' => 'js',
+			) as $key => $type ) {
 				foreach ( (array) ( $page[ $key ] ?? array() ) as $asset ) {
 					$url = (string) ( $asset['href'] ?? $asset['src'] ?? '' );
 					if ( '' === $url || empty( $asset['local'] ) || ! empty( $asset['minified'] ) || isset( $done[ $url ] ) ) {
@@ -432,7 +435,14 @@ final class Engine implements JobHandlerInterface {
 					try {
 						\SH\SpeedOptimizer\Assets\AssetCopies::generate( $url, $type );
 					} catch ( \Throwable $e ) {
-						$this->plugin->logger()->error( 'Asset generation failed.', array( 'url' => $url, 'error' => $e->getMessage() ), 'assets' );
+						$this->plugin->logger()->error(
+							'Asset generation failed.',
+							array(
+								'url'   => $url,
+								'error' => $e->getMessage(),
+							),
+							'assets'
+						);
 					}
 					if ( count( $done ) > 80 || microtime( true ) - $start > 6 ) {
 						$job->set( 'assets_done', $done );
@@ -823,7 +833,7 @@ final class Engine implements JobHandlerInterface {
 					)
 				)
 			);
-			$result = Verifier::compare( $baseline, $candidate, $this->expected_changes( $this->plugin->state()->active_ids() ) );
+			$result    = Verifier::compare( $baseline, $candidate, $this->expected_changes( $this->plugin->state()->active_ids() ) );
 			if ( ! $result['ok'] ) {
 				$failures[ $url ] = $result['failures'];
 				$job->set( 'failures', $failures );
@@ -868,7 +878,7 @@ final class Engine implements JobHandlerInterface {
 						)
 					)
 				);
-				$result = Verifier::compare( $baseline, $candidate, $optimization->expected_changes() );
+				$result    = Verifier::compare( $baseline, $candidate, $optimization->expected_changes() );
 				if ( ! $result['ok'] ) {
 					$found = true;
 					$this->rollback( $id, $result['failures'][0], 'health_check_failed', true, null );
@@ -984,7 +994,14 @@ final class Engine implements JobHandlerInterface {
 			try {
 				$optimization->rollback();
 			} catch ( \Throwable $e ) {
-				$this->plugin->logger()->error( 'Removing side effects failed.', array( 'optimization' => $id, 'error' => $e->getMessage() ), 'engine' );
+				$this->plugin->logger()->error(
+					'Removing side effects failed.',
+					array(
+						'optimization' => $id,
+						'error'        => $e->getMessage(),
+					),
+					'engine'
+				);
 			}
 		}
 	}
@@ -1191,7 +1208,14 @@ final class Engine implements JobHandlerInterface {
 			try {
 				$optimization->rollback();
 			} catch ( \Throwable $e ) {
-				$this->plugin->logger()->error( 'Rollback failed.', array( 'optimization' => $id, 'error' => $e->getMessage() ), 'rollback' );
+				$this->plugin->logger()->error(
+					'Rollback failed.',
+					array(
+						'optimization' => $id,
+						'error'        => $e->getMessage(),
+					),
+					'rollback'
+				);
 			}
 		}
 

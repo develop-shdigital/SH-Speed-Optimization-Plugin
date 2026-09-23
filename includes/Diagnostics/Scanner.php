@@ -31,13 +31,13 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Scanner implements JobHandlerInterface {
 
-	public const OPTION     = 'shso_scan';
-	public const MAX_PAGES  = 6;
-	public const DESKTOP    = array(
+	public const OPTION    = 'shso_scan';
+	public const MAX_PAGES = 6;
+	public const DESKTOP   = array(
 		'w' => 1350,
 		'h' => 900,
 	);
-	public const MOBILE     = array(
+	public const MOBILE    = array(
 		'w' => 390,
 		'h' => 844,
 	);
@@ -228,8 +228,8 @@ final class Scanner implements JobHandlerInterface {
 			);
 		}
 
-		$captured = PageAnalyzer::captured( $response['token_nonce'] );
-		$analysis = PageAnalyzer::analyze( (string) $response['body'], $url, $captured, $response );
+		$captured             = PageAnalyzer::captured( $response['token_nonce'] );
+		$analysis             = PageAnalyzer::analyze( (string) $response['body'], $url, $captured, $response );
 		$analysis['snapshot'] = Verifier::snapshot( $response );
 
 		return $analysis;
@@ -262,7 +262,7 @@ final class Scanner implements JobHandlerInterface {
 			}
 		}
 		if ( ! $page_id ) {
-			$pages = get_posts(
+			$pages   = get_posts(
 				array(
 					'post_type'      => 'page',
 					'post_status'    => 'publish',
@@ -439,7 +439,7 @@ final class Scanner implements JobHandlerInterface {
 					'selector'   => sanitize_text_field( (string) ( $lcp['selector'] ?? '' ) ),
 					'confidence' => 70,
 				);
-				$previous = (array) ( $entry['lcp'] ?? array() );
+				$previous  = (array) ( $entry['lcp'] ?? array() );
 				// Same LCP element on desktop and mobile → high confidence.
 				if ( ! empty( $previous['url'] ) && $previous['url'] === $candidate['url'] && ! empty( $entry['_scan'] ) && $entry['_scan'] === $job->id() ) {
 					$candidate['confidence'] = 95;

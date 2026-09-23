@@ -51,6 +51,11 @@ final class Purger {
 	);
 
 	/**
+	 * Post types whose content is shown on many pages.
+	 */
+	private const SITE_WIDE_TYPES = array( 'wp_template', 'wp_template_part', 'wp_global_styles', 'wp_navigation', 'wp_block', 'elementor_library', 'et_pb_layout', 'bricks_template', 'ct_template', 'fl-builder-template' );
+
+	/**
 	 * Cache manager.
 	 *
 	 * @var CacheManager
@@ -252,7 +257,13 @@ final class Purger {
 		if ( ! $post instanceof \WP_Post || isset( $this->posts[ (int) $post->ID ] ) ) {
 			return;
 		}
-		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) || in_array( $post->post_type, array( 'nav_menu_item', 'revision', 'customize_changeset', 'oembed_cache', 'wp_global_styles' ), true ) ) {
+		if ( wp_is_post_revision( $post ) || wp_is_post_autosave( $post ) || in_array( $post->post_type, array( 'nav_menu_item', 'revision', 'customize_changeset', 'oembed_cache' ), true ) ) {
+			return;
+		}
+		// Templates, template parts, global styles, block menus, synced patterns and builder
+		// templates (headers/footers) appear on many pages: purge everything.
+		if ( in_array( $post->post_type, self::SITE_WIDE_TYPES, true ) ) {
+			$this->queue_all( 'post_type:' . $post->post_type );
 			return;
 		}
 		if ( ! is_post_type_viewable( $post->post_type ) ) {
@@ -397,13 +408,14 @@ final class Purger {
 	}
 
 	/**
-	 * Widget settings or theme modifications changed.
+	 * Widget settings changed. (Theme modifications are covered by the Customizer
+	 * save hook; some themes rewrite theme_mods on every admin page view.)
 	 *
 	 * @param string $option Option name.
 	 */
 	public function on_updated_option( $option ): void {
 		$option = (string) $option;
-		if ( 0 === strpos( $option, 'widget_' ) || 0 === strpos( $option, 'theme_mods_' ) ) {
+		if ( 0 === strpos( $option, 'widget_' ) ) {
 			$this->queue_all( 'option:' . $option );
 		}
 	}

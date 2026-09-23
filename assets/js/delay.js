@@ -119,23 +119,18 @@
 				return;
 			}
 			var wrap = function ( target ) {
-				var native = target.addEventListener;
-				target.addEventListener = function ( type, fn, opts ) {
+				var original = target.addEventListener;
+				target.addEventListener = function ( type, fn ) {
 					var late = fn && ( ( 'DOMContentLoaded' === type && 'loading' !== d.readyState ) || ( 'load' === type && target === w && 'complete' === d.readyState ) );
 					if ( ! late ) {
-						return native.apply( this, arguments );
+						return original.apply( this, arguments );
 					}
+					// The event already happened: call the listener once, asynchronously.
 					setTimeout( function () {
-						var ev;
-						try {
-							ev = new Event( type );
-						} catch ( e ) {
-							ev = d.createEvent( 'Event' );
-							ev.initEvent( type, false, false );
-						}
+						var ev = event( type );
 						if ( 'function' === typeof fn ) {
 							fn.call( target, ev );
-						} else if ( fn && 'function' === typeof fn.handleEvent ) {
+						} else if ( 'function' === typeof fn.handleEvent ) {
 							fn.handleEvent( ev );
 						}
 					}, 0 );
@@ -189,7 +184,7 @@
 				if ( replay && w.onload !== onload && 'function' === typeof w.onload && 'complete' === d.readyState ) {
 					var fn = w.onload;
 					setTimeout( function () {
-						fn.call( w, new Event( 'load' ) );
+						fn.call( w, event( 'load' ) );
 					}, 0 );
 				}
 				setTimeout( callback, 0 );
@@ -246,14 +241,18 @@
 					after[ i ]();
 				} catch ( e ) {}
 			}
+			d.dispatchEvent( event( 'shso:delay-done' ) );
+		};
+
+		var event = function ( type ) {
 			var ev;
 			try {
-				ev = new CustomEvent( 'shso:delay-done' );
+				ev = new CustomEvent( type );
 			} catch ( e ) {
 				ev = d.createEvent( 'Event' );
-				ev.initEvent( 'shso:delay-done', true, true );
+				ev.initEvent( type, false, false );
 			}
-			d.dispatchEvent( ev );
+			return ev;
 		};
 
 		var idle = function ( fn ) {

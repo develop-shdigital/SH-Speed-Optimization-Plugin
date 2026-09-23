@@ -35,14 +35,14 @@ final class State {
 	 */
 	public static function blank(): array {
 		return array(
-			'active'          => array(), // id => {since, source, verified}.
-			'disabled'        => array(), // id => {reason, code, at}.
-			'page_exclusions' => array(), // id => string[] of "tpl:<key>" / "url:<path>".
-			'onboarding'      => self::ONBOARDING_NEW,
-			'last_scan_at'    => 0,
+			'active'           => array(), // id => {since, source, verified}.
+			'disabled'         => array(), // id => {reason, code, at}.
+			'page_exclusions'  => array(), // id => string[] of "tpl:<key>" / "url:<path>".
+			'onboarding'       => self::ONBOARDING_NEW,
+			'last_scan_at'     => 0,
 			'last_optimize_at' => 0,
-			'last_verify_at'  => 0,
-			'revision'        => 1, // Bumped on every change; used to version generated assets and cached pages.
+			'last_verify_at'   => 0,
+			'revision'         => 1, // Bumped on every change; used to version generated assets and cached pages.
 		);
 	}
 
@@ -169,7 +169,7 @@ final class State {
 		$data = $this->all();
 		$list = $data['page_exclusions'][ $id ] ?? array();
 		if ( ! in_array( $key, $list, true ) ) {
-			$list[]                           = $key;
+			$list[]                         = $key;
 			$data['page_exclusions'][ $id ] = array_slice( $list, -100 );
 			$this->save( $data );
 		}
