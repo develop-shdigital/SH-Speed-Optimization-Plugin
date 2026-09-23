@@ -25,7 +25,7 @@ add_action(
 	'wp_footer',
 	static function () {
 		if ( get_option( 'shso_e2e_breaker' ) ) {
-			echo '<script>window.ShsoE2eLib.init();</script>';
+			echo '<script>window.__e2eWidgetRegistry.boot();</script>';
 		}
 	},
 	5

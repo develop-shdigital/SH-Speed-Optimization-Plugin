@@ -1,6 +1,6 @@
 /* SH Speed Optimizer E2E fixture library. */
-window.ShsoE2eLib = {
-	init: function () {
+window.__e2eWidgetRegistry = {
+	boot: function () {
 		document.documentElement.setAttribute( 'data-e2e-lib', 'ok' );
 	}
 };

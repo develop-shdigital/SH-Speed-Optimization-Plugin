@@ -38,7 +38,20 @@ function reset() {
  * @returns {{active: Record<string, any>, disabled: Record<string, any>, onboarding: string}}
  */
 function state() {
-	return JSON.parse( wpCli( [ 'eval', 'echo wp_json_encode( get_option( "shso_state" ) );' ] ) || '{}' );
+	return evalJson( 'get_option( "shso_state" )' ) || {};
+}
+
+/**
+ * Evaluate a PHP expression and return it decoded. Output is wrapped in markers because
+ * other plugins (e.g. Elementor's logger) may print notices at shutdown.
+ *
+ * @param {string} expression PHP expression.
+ * @returns {any}
+ */
+function evalJson( expression ) {
+	const out = wpCli( [ 'eval', `echo "<<<SHSO" . wp_json_encode( ${ expression } ) . "SHSO>>>";` ] );
+	const match = out.match( /<<<SHSO([\s\S]*?)SHSO>>>/ );
+	return match ? JSON.parse( match[ 1 ] ) : null;
 }
 
 /**
@@ -158,6 +171,7 @@ async function waitForJobEnd( page, timeout ) {
 
 module.exports = {
 	PLUGIN,
+	evalJson,
 	activate,
 	reset,
 	state,
