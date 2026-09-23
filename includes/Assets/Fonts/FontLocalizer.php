@@ -186,6 +186,22 @@ final class FontLocalizer {
 		return $due;
 	}
 
+	/**
+	 * Timestamp of the next retry of a failed entry, or null.
+	 *
+	 * @param array<string,array<string,mixed>> $map Mapping.
+	 */
+	public static function next_retry( array $map ): ?int {
+		$next = null;
+		foreach ( $map as $entry ) {
+			if ( self::STATUS_FAILED === ( $entry['status'] ?? '' ) && (int) ( $entry['attempts'] ?? 0 ) < self::MAX_ATTEMPTS ) {
+				$at   = (int) ( $entry['next_try'] ?? 0 );
+				$next = null === $next ? $at : min( $next, $at );
+			}
+		}
+		return $next;
+	}
+
 	// ---------------------------------------------------------------------
 	// Background work.
 	// ---------------------------------------------------------------------

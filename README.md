@@ -51,7 +51,7 @@ background and optimizations that need a browser test are simply not applied.
 ### Optional
 
 * **Faster cache delivery** — *Cache → Enable faster cache delivery* adds
-  `define( 'WP_CACHE', true );` to `wp-config.php` (a backup is made first) so
+  one marked line, `define( 'WP_CACHE', true );`, to `wp-config.php` (verified, reverted on any problem, removed on deactivation) so
   cached pages are served before WordPress loads. Without it, the page cache
   still works ("standard delivery").
 * **Browser caching rules** — on Apache/LiteSpeed, allow SH Speed to add

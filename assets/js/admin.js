@@ -2781,7 +2781,7 @@
 							h( 'p', {}, h( 'strong', {}, __( 'Standard delivery', 'sh-speed-optimizer' ) ) ),
 							h( 'p', { class: 'shso-muted' }, __( 'Cached pages are delivered by WordPress. Faster delivery is possible.', 'sh-speed-optimizer' ) ),
 							h( 'div', { class: 'shso-row' }, button( __( 'Enable faster cache delivery', 'sh-speed-optimizer' ), ( btn ) => this.enableEarly( btn ), { id: 'shso-enable-early', describedby: 'shso-early-help' } ) ),
-							h( 'p', { class: 'shso-muted shso-small', id: 'shso-early-help' }, __( 'Adds define( \'WP_CACHE\', true ); to wp-config.php. A backup is made first.', 'sh-speed-optimizer' ) )
+							h( 'p', { class: 'shso-muted shso-small', id: 'shso-early-help' }, __( 'Adds one marked line, define( \'WP_CACHE\', true );, to wp-config.php. It is removed again when you deactivate the plugin.', 'sh-speed-optimizer' ) )
 						);
 						break;
 					case 'external':
@@ -2929,7 +2929,7 @@
 
 		enableEarly( btn ) {
 			// eslint-disable-next-line no-alert
-			if ( ! window.confirm( __( 'SH Speed will add define( \'WP_CACHE\', true ); to wp-config.php. A backup of wp-config.php is made first. Continue?', 'sh-speed-optimizer' ) ) ) {
+			if ( ! window.confirm( __( 'SH Speed will add one marked line, define( \'WP_CACHE\', true );, to wp-config.php and check that your site still loads (otherwise the change is reverted immediately). Continue?', 'sh-speed-optimizer' ) ) ) {
 				return;
 			}
 			busy( btn, true );

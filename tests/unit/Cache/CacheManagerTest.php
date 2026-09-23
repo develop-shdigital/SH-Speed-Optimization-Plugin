@@ -42,6 +42,7 @@ final class CacheManagerTest extends TestCase {
 	private function cleanup(): void {
 		$this->fs->delete_tree( Filesystem::cache_root() . 'pages/example.test' );
 		$this->fs->delete( Filesystem::cache_root() . 'config/example.test.json' );
+		$this->fs->delete( Filesystem::cache_root() . 'config/example.test.purged.txt' );
 		Delivery::reset();
 	}
 
@@ -132,6 +133,18 @@ final class CacheManagerTest extends TestCase {
 		$this->assertSame( 4, $cache->purge_all( 'test' ) );
 		$this->assertSame( 0, $cache->storage()->usage( 'example.test/' )['files'] );
 		$this->assertContains( 'shso_cache_cleared', $GLOBALS['shso_test_actions'] );
+	}
+
+	public function test_renders_started_before_a_purge_are_not_stored(): void {
+		$cache  = $this->manager();
+		$before = microtime( true ) - 1;
+		$cache->purge_all( 'test' );
+		$after = microtime( true ) + 1;
+
+		$this->assertTrue( $cache->purged_since( 'example.test', $before ) );
+		$this->assertFalse( $cache->purged_since( 'example.test', $after ) );
+		$this->assertFalse( $cache->purged_since( '../example.test', $before ) );
+		$this->assertFalse( $cache->purged_since( 'never-purged.test', $before ) );
 	}
 
 	public function test_status_and_stats_shape(): void {

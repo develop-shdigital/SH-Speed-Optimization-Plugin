@@ -155,10 +155,10 @@ final class DropinTest extends TestCase {
 
 		$contents = (string) file_get_contents( $path );
 		$this->assertStringContainsString( "define( 'WP_CACHE', true ); // " . Dropin::WP_CACHE_MARKER, $contents );
-		$backup = get_option( Dropin::BACKUP_OPTION );
-		$this->assertIsString( $backup );
-		$this->assertStringEndsWith( '.txt', $backup );
-		$this->assertSame( self::WP_CONFIG, file_get_contents( $backup ), 'The original was backed up.' );
+		$record = get_option( Dropin::BACKUP_OPTION );
+		$this->assertIsArray( $record );
+		$this->assertSame( hash( 'sha256', self::WP_CONFIG ), $record['sha256'], 'Only a fingerprint of the original is recorded.' );
+		$this->assertStringNotContainsString( 'DB_PASSWORD', (string) wp_json_encode( $record ), 'No copy of wp-config.php (credentials) is stored.' );
 
 		$again = Dropin::enable_wp_cache_constant();
 		$this->assertInstanceOf( \WP_Error::class, $again, 'Refuses when WP_CACHE is already defined in the file.' );
@@ -167,7 +167,5 @@ final class DropinTest extends TestCase {
 		$this->assertTrue( Dropin::disable_wp_cache_constant() );
 		$this->assertSame( self::WP_CONFIG, file_get_contents( $path ) );
 		$this->assertTrue( Dropin::disable_wp_cache_constant(), 'Nothing to remove is fine.' );
-
-		@unlink( (string) get_option( Dropin::BACKUP_OPTION ) );
 	}
 }

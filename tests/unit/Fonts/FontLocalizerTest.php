@@ -107,6 +107,7 @@ final class FontLocalizerTest extends TestCase {
 		$this->assertSame( 1, $entry['attempts'] );
 		$this->assertCount( 1, $calls, 'No font file was downloaded.' );
 		$this->assertSame( array(), FontLocalizer::due( FontLocalizer::mapping(), time() ), 'Retries wait.' );
+		$this->assertGreaterThan( time(), FontLocalizer::next_retry( FontLocalizer::mapping() ) );
 
 		$doc      = new HtmlDocument( '<!DOCTYPE html><html><head><link rel="stylesheet" href="' . htmlspecialchars( self::CSS_URL, ENT_QUOTES ) . '"></head><body></body></html>' );
 		$before   = $doc->html();

@@ -1251,6 +1251,9 @@ final class Engine implements JobHandlerInterface {
 		 */
 		do_action( 'shso_optimization_rollback', $id, $reason, $code );
 
+		// Cached pages may reference files the rollback just removed (optimized copies, local fonts).
+		$this->on_configuration_changed( 'rollback:' . $id );
+
 		if ( null !== $job ) {
 			$rolled        = (array) $job->get( 'rolled_back', array() );
 			$rolled[ $id ] = array(

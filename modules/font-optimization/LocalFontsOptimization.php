@@ -201,19 +201,21 @@ final class LocalFontsOptimization extends AbstractOptimization {
 
 		if ( $remaining > 0 ) {
 			Scheduler::async( self::CRON_HOOK, array(), 60 );
+		} else {
+			$retry = FontLocalizer::next_retry( FontLocalizer::mapping() );
+			if ( null !== $retry ) {
+				Scheduler::async( self::CRON_HOOK, array(), max( 60, $retry - time() ) );
+			}
 		}
 
 		if ( self::ok_count( FontLocalizer::mapping() ) > $before ) {
 			/**
 			 * Fires after Google Fonts were downloaded and pages can use the local copies.
-			 * Cached pages still reference Google until they are regenerated.
 			 */
 			do_action( 'shso_local_fonts_updated' );
+			// Cached pages still reference Google: regenerate them with the local copies.
 			try {
-				$cache = $this->plugin->cache();
-				if ( method_exists( $cache, 'purge_all' ) ) {
-					$cache->purge_all();
-				}
+				$this->plugin->cache()->purge_all( 'local_fonts' );
 			} catch ( \Throwable $e ) {
 				unset( $e );
 			}

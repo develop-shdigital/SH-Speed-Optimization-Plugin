@@ -438,23 +438,30 @@ PHP;
 	}
 
 	/**
-	 * Back up wp-config.php into the private cache directory (unguessable file name).
+	 * Record a wp-config.php change.
 	 *
-	 * @param string $contents Contents.
-	 * @return string|null Backup path.
+	 * wp-config.php contains database credentials and salts, so no copy of it
+	 * is ever written anywhere (a file below wp-content could be reachable on
+	 * servers that ignore .htaccess). The automatic restore uses the original
+	 * contents held in memory, and the change itself is a single marked line
+	 * that disable_wp_cache_constant() removes deterministically. Only a
+	 * fingerprint is stored for diagnostics.
+	 *
+	 * @param string $contents Original contents.
+	 * @return string|null Fingerprint.
 	 */
 	private static function backup_wp_config( string $contents ): ?string {
-		$fs   = Plugin::instance()->filesystem();
-		$file = $fs->cache_dir( 'backups' ) . 'wp-config-' . gmdate( 'Ymd-His' ) . '-' . bin2hex( random_bytes( 16 ) ) . '.txt';
-		if ( ! $fs->write( $file, $contents ) ) {
-			return null;
-		}
-		$previous = get_option( self::BACKUP_OPTION );
-		if ( is_string( $previous ) && '' !== $previous && $previous !== $file ) {
-			$fs->delete( $previous );
-		}
-		update_option( self::BACKUP_OPTION, $file, false );
-		return $file;
+		$fingerprint = hash( 'sha256', $contents );
+		update_option(
+			self::BACKUP_OPTION,
+			array(
+				'sha256' => $fingerprint,
+				'bytes'  => strlen( $contents ),
+				'time'   => time(),
+			),
+			false
+		);
+		return $fingerprint;
 	}
 
 	/**
