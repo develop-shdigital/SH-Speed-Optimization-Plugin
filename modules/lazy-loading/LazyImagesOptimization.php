@@ -70,6 +70,14 @@ final class LazyImagesOptimization extends AbstractOptimization {
 	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
+		$disabled_by = LazyLoadingPolicy::images_disabled_by();
+		if ( null !== $disabled_by ) {
+			$assessment             = Assessment::make( true, 90, Assessment::BENEFIT_LOW );
+			$assessment->handled_by = $disabled_by;
+			$assessment->note( __( 'Image lazy loading is controlled by another system on this site, so SH Speed Optimizer leaves it alone.', 'sh-speed-optimizer' ) );
+			return $this->finalize( $assessment, $context, 'lazy_load' );
+		}
+
 		$pages = $context->pages();
 		if ( empty( $pages ) ) {
 			$assessment = Assessment::make( true, 85, Assessment::BENEFIT_LOW );

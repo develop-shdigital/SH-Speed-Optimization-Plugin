@@ -81,7 +81,25 @@ final class Signer {
 	 * Signing key: a per-site random secret combined with the WordPress salts.
 	 */
 	private static function key(): string {
-		return hash( 'sha256', self::ensure_secret() . wp_salt( 'nonce' ) );
+		return hash( 'sha256', self::ensure_secret() . self::salt() );
+	}
+
+	/**
+	 * Salt from wp-config.php constants.
+	 *
+	 * wp_salt() is a pluggable function that does not exist yet when tokens are
+	 * verified (during plugin loading), so the constants are read directly.
+	 * The random per-site secret alone already makes tokens unforgeable; the
+	 * salt only adds protection if the database leaks.
+	 */
+	private static function salt(): string {
+		$salt = '';
+		foreach ( array( 'NONCE_KEY', 'NONCE_SALT', 'AUTH_KEY' ) as $constant ) {
+			if ( defined( $constant ) && 'put your unique phrase here' !== constant( $constant ) ) {
+				$salt .= (string) constant( $constant );
+			}
+		}
+		return $salt;
 	}
 
 	/**

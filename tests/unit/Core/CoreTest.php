@@ -37,7 +37,7 @@ final class CoreTest extends TestCase {
 	public function test_signer_rejects_expired_tokens(): void {
 		$secret = Signer::ensure_secret();
 		$body   = rtrim( strtr( base64_encode( json_encode( array( 'm' => 'baseline', 'e' => time() - 5 ) ) ), '+/', '-_' ), '=' );
-		$sig    = rtrim( strtr( base64_encode( hash_hmac( 'sha256', $body, hash( 'sha256', $secret . wp_salt( 'nonce' ) ), true ) ), '+/', '-_' ), '=' );
+		$sig    = rtrim( strtr( base64_encode( hash_hmac( 'sha256', $body, hash( 'sha256', $secret ), true ) ), '+/', '-_' ), '=' );
 		$this->assertNull( Signer::verify( $body . '.' . $sig ) );
 	}
 

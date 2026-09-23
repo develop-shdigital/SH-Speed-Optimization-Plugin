@@ -120,7 +120,7 @@ final class LazyIframesOptimization extends AbstractOptimization {
 				if ( ! $doc->contains( '<iframe' ) ) {
 					return;
 				}
-				if ( function_exists( 'wp_lazy_loading_enabled' ) && ! wp_lazy_loading_enabled( 'iframe', 'shso_lazy_load' ) ) {
+				if ( LazyLoadingPolicy::iframes_disabled() ) {
 					return;
 				}
 				$data   = $runtime->page_data();

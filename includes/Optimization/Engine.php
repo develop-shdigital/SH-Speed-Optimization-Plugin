@@ -299,7 +299,23 @@ final class Engine implements JobHandlerInterface {
 			$job->set( 'health_before', $scan['health']['score'] ?? null );
 		}
 
-		$registry   = $this->plugin->registry();
+		$registry = $this->plugin->registry();
+
+		// Avoid double optimization: turn off active optimizations another system now provides.
+		foreach ( (array) $job->get( 'decisions', array() ) as $id => $entry ) {
+			$handled_by = $entry['assessment']['handled_by'] ?? null;
+			if ( null !== $handled_by && '' !== (string) $handled_by && $this->plugin->state()->is_active( (string) $id ) ) {
+				$this->rollback(
+					(string) $id,
+					/* translators: %s: name of another plugin or service */
+					sprintf( __( 'Now handled by %s.', 'sh-speed-optimizer' ), (string) $handled_by ),
+					'handled_elsewhere',
+					false,
+					$job
+				);
+			}
+		}
+
 		$candidates = array();
 		foreach ( (array) $job->get( 'decisions', array() ) as $id => $entry ) {
 			$action = (string) ( $entry['decision']['action'] ?? '' );
