@@ -78,6 +78,8 @@ final class JsDeferOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$blocking = array();
@@ -127,6 +129,8 @@ final class JsDeferOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		if ( ! $this->plugin->context()->is_frontend_request() ) {

@@ -160,13 +160,15 @@ final class Admin {
 				$page['title']
 			);
 
+			// The Overview submenu shares the top-level slug (and page hook): registering a
+			// second callback for it would render the page twice.
 			$hook = add_submenu_page(
 				self::MENU_SLUG,
 				$title,
 				$page['menu'],
 				$cap,
 				$page['slug'],
-				function () use ( $id ) {
+				self::MENU_SLUG === $page['slug'] ? '' : function () use ( $id ) {
 					$this->render( $id );
 				}
 			);

@@ -76,6 +76,8 @@ final class JsMinifyOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$scripts = $context->collect( 'scripts' );
@@ -107,6 +109,8 @@ final class JsMinifyOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		AssetPipeline::register( $runtime );

@@ -69,6 +69,8 @@ final class CssMinifyOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$styles = $context->collect( 'styles' );
@@ -100,6 +102,8 @@ final class CssMinifyOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		AssetPipeline::register( $runtime );

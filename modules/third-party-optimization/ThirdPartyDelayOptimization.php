@@ -77,6 +77,8 @@ final class ThirdPartyDelayOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$excluded = Exclusions::from_settings( $context->rules, 'js_no_delay', $context->settings->all(), 'exclude_js' );
@@ -151,6 +153,8 @@ final class ThirdPartyDelayOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		if ( ! $this->plugin->context()->is_frontend_request() ) {

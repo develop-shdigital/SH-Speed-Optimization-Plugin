@@ -100,6 +100,9 @@ final class Engine implements JobHandlerInterface {
 				return sprintf( __( 'Applying %s optimizations…', 'sh-speed-optimizer' ), $category );
 			case 'opt:assets':
 				return __( 'Generating optimized copies of CSS and JavaScript files…', 'sh-speed-optimizer' );
+			case 'opt:critical':
+			case 'opt:criticalsave':
+				return __( 'Generating critical CSS in this browser…', 'sh-speed-optimizer' );
 			case 'opt:verify':
 			case 'opt:isolate':
 				/* translators: %s: optimization group */
@@ -141,6 +144,10 @@ final class Engine implements JobHandlerInterface {
 				return $this->step_plan( $job );
 			case 'opt:baseline':
 				return $this->step_baseline( $job );
+			case 'opt:critical':
+				return $this->step_critical( $job, $category );
+			case 'opt:criticalsave':
+				return $this->step_critical_save( $job, $category );
 			case 'opt:apply':
 				return $this->step_apply( $job, $category );
 			case 'opt:assets':
@@ -356,6 +363,11 @@ final class Engine implements JobHandlerInterface {
 
 		$steps = array( 'opt:baseline' );
 		foreach ( $groups as $category => $ids ) {
+			if ( in_array( 'critical_css', $ids, true ) ) {
+				// Critical CSS is generated in the browser before it can be applied.
+				$steps[] = 'opt:critical:' . $category;
+				$steps[] = 'opt:criticalsave:' . $category;
+			}
 			$steps[] = 'opt:apply:' . $category;
 			if ( in_array( $category, array( Category::CSS, Category::JAVASCRIPT ), true ) ) {
 				$steps[] = 'opt:assets:' . $category;
@@ -422,6 +434,104 @@ final class Engine implements JobHandlerInterface {
 		$this->on_configuration_changed( 'group:' . $category );
 
 		return StepResult::done();
+	}
+
+	/**
+	 * Ask the browser to generate critical CSS for the sample pages.
+	 *
+	 * @param Job    $job      Job.
+	 * @param string $category Category.
+	 */
+	private function step_critical( Job $job, string $category ): StepResult {
+		if ( ! $job->arg( 'browser' ) || false === $job->get( 'browser_available', null ) ) {
+			$this->drop_from_group( $job, $category, 'critical_css', __( 'Critical CSS: needs your browser to generate it. Run the optimization from the dashboard.', 'sh-speed-optimizer' ) );
+			$job->set( 'skip_critical_' . $category, true );
+			return StepResult::done();
+		}
+		return StepResult::await_browser( $this->plugin->scanner()->browser_plan( $job, 'critical_css', array( 'm' => 'baseline' ), 'k', self::VERIFY_URLS ) );
+	}
+
+	/**
+	 * Store critical CSS generated in the browser (per template).
+	 *
+	 * @param Job    $job      Job.
+	 * @param string $category Category.
+	 */
+	private function step_critical_save( Job $job, string $category ): StepResult {
+		if ( $job->get( 'skip_critical_' . $category ) ) {
+			return StepResult::done();
+		}
+		if ( ! class_exists( '\SH\SpeedOptimizer\Modules\CssOptimization\CriticalCssOptimization' ) ) {
+			$this->drop_from_group( $job, $category, 'critical_css', __( 'Critical CSS is not available.', 'sh-speed-optimizer' ) );
+			return StepResult::done();
+		}
+
+		$by_template = array();
+		foreach ( $job->browser_results() as $key => $result ) {
+			if ( ! is_array( $result ) || empty( $result['critical_css']['css'] ) || ! empty( $result['critical_css']['error'] ) ) {
+				continue;
+			}
+			$template = sanitize_key( (string) ( $result['template'] ?? '' ) );
+			if ( '' === $template ) {
+				continue;
+			}
+			$by_template[ $template ][ (string) $key ] = (array) $result['critical_css'];
+		}
+
+		$stored = 0;
+		foreach ( $by_template as $template => $results ) {
+			ksort( $results ); // Desktop (":d") before mobile (":m").
+			$css        = '';
+			$widths     = array();
+			$sheets     = array();
+			$confidence = 92;
+			foreach ( $results as $critical ) {
+				$part = trim( (string) $critical['css'] );
+				if ( '' !== $part && false === strpos( $css, $part ) ) {
+					$css .= ( '' === $css ? '' : "\n" ) . $part;
+				}
+				$widths[] = (int) ( $critical['width'] ?? 0 );
+				$sheets   = array_merge( $sheets, (array) ( $critical['sheets'] ?? array() ) );
+				if ( ! empty( $critical['sheets_skipped'] ) || ! empty( $critical['truncated'] ) ) {
+					$confidence = 60; // Cross-origin or truncated styles: not complete enough to be applied.
+				}
+			}
+			\SH\SpeedOptimizer\Modules\CssOptimization\CriticalCssOptimization::store(
+				$template,
+				$css,
+				$confidence,
+				array(
+					'viewport_widths' => array_filter( $widths ),
+					'source_hash'     => \SH\SpeedOptimizer\Modules\CssOptimization\CriticalCssOptimization::source_hash( array_map( 'strval', $sheets ) ),
+				)
+			);
+			if ( $confidence >= 90 ) {
+				++$stored;
+			}
+		}
+
+		if ( 0 === $stored ) {
+			$this->drop_from_group( $job, $category, 'critical_css', __( 'Critical CSS: no page produced reliable critical CSS (for example because styles come from other domains).', 'sh-speed-optimizer' ) );
+		}
+
+		return StepResult::done();
+	}
+
+	/**
+	 * Remove an optimization from a planned group before it is applied.
+	 *
+	 * @param Job    $job      Job.
+	 * @param string $category Category.
+	 * @param string $id       Optimization id.
+	 * @param string $message  Message.
+	 */
+	private function drop_from_group( Job $job, string $category, string $id, string $message ): void {
+		$groups = (array) $job->get( 'groups', array() );
+		if ( isset( $groups[ $category ] ) ) {
+			$groups[ $category ] = array_values( array_diff( (array) $groups[ $category ], array( $id ) ) );
+			$job->set( 'groups', $groups );
+		}
+		$job->message( $message, 'warning' );
 	}
 
 	/**

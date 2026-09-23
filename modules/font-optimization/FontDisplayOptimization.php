@@ -117,6 +117,10 @@ final class FontDisplayOptimization extends AbstractOptimization {
 			},
 			30
 		);
+		// Stylesheet copies must be generated even when CSS minification is off.
+		if ( class_exists( '\SH\SpeedOptimizer\Modules\AssetOptimization\AssetPipeline' ) ) {
+			\SH\SpeedOptimizer\Modules\AssetOptimization\AssetPipeline::register( $runtime );
+		}
 
 		$runtime->add_html_transform(
 			$this->id(),

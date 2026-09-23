@@ -69,9 +69,9 @@
 
 	// Selector usable with querySelectorAll: without pseudo-elements and user-action states.
 	function matchable( selector ) {
-		var s = selector.replace( PSEUDO_ELEMENTS, '' ).replace( USER_ACTIONS, '' ).trim();
-		s = s.replace( /([>+~])\s*(?=[>+~]|$)/g, '$1 *' ).trim();
-		s = s.replace( /\(\s*\)/g, '(*)' );
+		var s = selector.replace( PSEUDO_ELEMENTS, '' ).replace( USER_ACTIONS, '' );
+		s = s.replace( /:(?:not|is|where|has|matches)\(\s*\)/g, '' ).trim();
+		s = s.replace( /([>+~])\s*(?=[>+~]|$)/g, '$1 *' ).replace( /^([>+~])/, '* $1' ).trim();
 		return '' === s ? '*' : s;
 	}
 

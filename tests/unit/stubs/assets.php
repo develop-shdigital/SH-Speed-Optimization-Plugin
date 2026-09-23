@@ -10,7 +10,9 @@
 
 // phpcs:ignoreFile
 
-$GLOBALS['shso_test_cron'] = array();
+if ( ! isset( $GLOBALS['shso_test_cron'] ) ) {
+	$GLOBALS['shso_test_cron'] = array();
+}
 
 if ( ! function_exists( 'wp_next_scheduled' ) ) {
 	function wp_next_scheduled( $hook, $args = array() ) {
@@ -48,17 +50,19 @@ if ( ! function_exists( 'wp_clear_scheduled_hook' ) ) {
 	}
 }
 
-/**
- * Create a file below the test WordPress root and return its path.
- *
- * @param string $relative Path relative to ABSPATH.
- * @param string $contents Contents.
- */
-function shso_test_asset_file( string $relative, string $contents ): string {
-	$path = ABSPATH . ltrim( $relative, '/' );
-	if ( ! is_dir( dirname( $path ) ) ) {
-		mkdir( dirname( $path ), 0777, true );
+if ( ! function_exists( 'shso_test_asset_file' ) ) {
+	/**
+	 * Create a file below the test WordPress root and return its path.
+	 *
+	 * @param string $relative Path relative to ABSPATH.
+	 * @param string $contents Contents.
+	 */
+	function shso_test_asset_file( string $relative, string $contents ): string {
+		$path = ABSPATH . ltrim( $relative, '/' );
+		if ( ! is_dir( dirname( $path ) ) ) {
+			mkdir( dirname( $path ), 0777, true );
+		}
+		file_put_contents( $path, $contents );
+		return $path;
 	}
-	file_put_contents( $path, $contents );
-	return $path;
 }

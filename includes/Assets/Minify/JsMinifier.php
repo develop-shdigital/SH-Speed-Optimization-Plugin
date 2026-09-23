@@ -29,14 +29,14 @@ defined( 'ABSPATH' ) || exit;
  */
 final class JsMinifier {
 
-	private const T_WORD    = 'w';
-	private const T_PUNCT   = 'p';
-	private const T_STRING  = 's';
+	private const T_WORD     = 'w';
+	private const T_PUNCT    = 'p';
+	private const T_STRING   = 's';
 	private const T_TEMPLATE = 't';
-	private const T_REGEX   = 'r';
-	private const T_SPACE   = ' ';
-	private const T_NEWLINE = 'n';
-	private const T_COMMENT = 'c';
+	private const T_REGEX    = 'r';
+	private const T_SPACE    = ' ';
+	private const T_NEWLINE  = 'n';
+	private const T_COMMENT  = 'c';
 
 	/**
 	 * Keywords after which a slash starts a regular expression.
@@ -212,7 +212,7 @@ final class JsMinifier {
 			}
 
 			// Punctuators (single characters; merging is prevented at output time).
-			if ( false !== strpos( "{}()[];,.:?!~+-*/%&|^<>=@", $c ) ) {
+			if ( false !== strpos( '{}()[];,.:?!~+-*/%&|^<>=@', $c ) ) {
 				$tokens[] = array( self::T_PUNCT, $c );
 
 				if ( '(' === $c ) {
@@ -427,7 +427,7 @@ final class JsMinifier {
 				++$i;
 				continue;
 			}
-			if ( false !== strpos( "()[];,.:?!~+-*/%&|^<>=@", $c ) ) {
+			if ( false !== strpos( '()[];,.:?!~+-*/%&|^<>=@', $c ) ) {
 				$regex_ok = ! in_array( $c, array( ')', ']' ), true );
 				++$i;
 				continue;

@@ -150,8 +150,8 @@ final class ScriptGraph {
 		}
 		return array_filter(
 			$seen,
-			static function ( $list ) {
-				return count( $list ) > 1;
+			static function ( $occurrences ) {
+				return count( $occurrences ) > 1;
 			}
 		);
 	}
@@ -266,9 +266,9 @@ final class ScriptGraph {
 	/**
 	 * Globals a handle defines (defaults + rules + conventions).
 	 *
-	 * @param string                  $handle         Handle.
-	 * @param array<string,string[]>  $inline_globals Rules ( handle => globals ).
-	 * @param array<string,bool>      $jquery_based   Handles depending (transitively) on jQuery.
+	 * @param string                 $handle         Handle.
+	 * @param array<string,string[]> $inline_globals Rules ( handle => globals ).
+	 * @param array<string,bool>     $jquery_based   Handles depending (transitively) on jQuery.
 	 * @return string[]
 	 */
 	public static function globals_for( string $handle, array $inline_globals = array(), array $jquery_based = array() ): array {
@@ -290,23 +290,23 @@ final class ScriptGraph {
 	/**
 	 * Whether code references a global.
 	 *
-	 * @param string $code   Code.
-	 * @param string $global Global name ("jQuery", "$", "_", "wp" …).
+	 * @param string $code Code.
+	 * @param string $name Global name ("jQuery", "$", "_", "wp" …).
 	 */
-	public static function references_global( string $code, string $global ): bool {
-		if ( '' === $global || false === strpos( $code, rtrim( $global, '.' ) ) ) {
+	public static function references_global( string $code, string $name ): bool {
+		if ( '' === $name || false === strpos( $code, $name ) ) {
 			return false;
 		}
-		if ( '$' === $global ) {
+		if ( '$' === $name ) {
 			return (bool) preg_match( '/(?<![\w$])\$\s*[(.\[]/', $code );
 		}
-		if ( '_' === $global ) {
+		if ( '_' === $name ) {
 			return (bool) preg_match( '/(?<![\w$])_\s*[(.]/', $code );
 		}
-		if ( 'wp' === $global ) {
+		if ( 'wp' === $name ) {
 			return (bool) preg_match( '/(?<![\w$])wp\s*[.\[]/', $code );
 		}
-		return (bool) preg_match( '/(?<![\w$])' . preg_quote( $global, '/' ) . '(?![\w$])/', $code );
+		return (bool) preg_match( '/(?<![\w$])' . preg_quote( $name, '/' ) . '(?![\w$])/', $code );
 	}
 
 	/**
@@ -485,9 +485,9 @@ final class ScriptGraph {
 	/**
 	 * Whether a tag position ends up deferred.
 	 *
-	 * @param int                $position   Position.
-	 * @param array<int,string>  $state      States.
-	 * @param array<int,string>  $candidates Current candidates.
+	 * @param int               $position   Position.
+	 * @param array<int,string> $state      States.
+	 * @param array<int,string> $candidates Current candidates.
 	 */
 	private function is_deferred( int $position, array $state, array $candidates ): bool {
 		return 'deferred' === ( $state[ $position ] ?? '' ) || array_key_exists( $position, $candidates );
@@ -551,7 +551,8 @@ final class ScriptGraph {
 	public static function name_hints( string $handle, string $src ): array {
 		$generic = array( 'script', 'scripts', 'main', 'frontend', 'front', 'public', 'bundle', 'app', 'core', 'init', 'vendor', 'vendors', 'plugin', 'plugins', 'custom', 'theme', 'common', 'site', 'global', 'index', 'jquery', 'js', 'min', 'dist', 'build', 'assets', 'block', 'blocks', 'view', 'style', 'polyfill', 'runtime', 'chunk', 'lib', 'libs', 'module', 'modules', 'admin', 'wordpress', 'utils', 'util', 'helper', 'helpers', 'functions' );
 		$base    = (string) preg_replace( '/(\.min)?\.js$/i', '', basename( (string) preg_replace( '/[?#].*$/s', '', $src ) ) );
-		$words   = preg_split( '/[^a-z0-9]+/', strtolower( $handle . ' ' . $base ) ) ?: array();
+		$words   = preg_split( '/[^a-z0-9]+/', strtolower( $handle . ' ' . $base ) );
+		$words   = is_array( $words ) ? $words : array();
 		$names   = array();
 		foreach ( $words as $word ) {
 			if ( strlen( $word ) >= 4 && ! ctype_digit( $word ) && ! in_array( $word, $generic, true ) ) {

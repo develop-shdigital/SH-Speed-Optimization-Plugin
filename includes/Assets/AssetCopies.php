@@ -722,7 +722,13 @@ final class AssetCopies {
 	private function mark( string $path, string $status, string $reason ): array {
 		$this->fs->write( $path . '.skip.txt', $status . ': ' . $reason );
 		if ( 'failed' === $status ) {
-			$this->log( 'Optimized asset copy discarded; the original stays in use.', array( 'file' => basename( $path ), 'reason' => $reason ) );
+			$this->log(
+				'Optimized asset copy discarded; the original stays in use.',
+				array(
+					'file'   => basename( $path ),
+					'reason' => $reason,
+				)
+			);
 		}
 		return array(
 			'status' => $status,
@@ -739,7 +745,7 @@ final class AssetCopies {
 	private function touch( string $path ): void {
 		$mtime = (int) @filemtime( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		if ( $mtime > 0 && $mtime < time() - (int) $this->limits['touch_after'] && $this->fs->is_allowed_path( $path ) ) {
-			@touch( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			@touch( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions -- Metadata update of our own cache file.
 		}
 	}
 

@@ -166,6 +166,8 @@ final class JobManager {
 				if ( StepResult::DONE === $result->status ) {
 					$job->advance();
 				} elseif ( StepResult::AWAIT_BROWSER === $result->status ) {
+					// The requesting step is finished; the next step consumes the browser results.
+					$job->advance();
 					$job->request_browser( $result->plan );
 					$this->save( $job );
 					break;

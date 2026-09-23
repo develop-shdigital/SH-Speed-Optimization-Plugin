@@ -641,8 +641,10 @@ final class CssMinifier {
 		while ( ! empty( $tokens ) && self::T_WS === $tokens[0][0] ) {
 			array_shift( $tokens );
 		}
-		while ( ! empty( $tokens ) && self::T_WS === $tokens[ count( $tokens ) - 1 ][0] ) {
+		$last = count( $tokens ) - 1;
+		while ( $last >= 0 && self::T_WS === $tokens[ $last ][0] ) {
 			array_pop( $tokens );
+			--$last;
 		}
 		return $tokens;
 	}
