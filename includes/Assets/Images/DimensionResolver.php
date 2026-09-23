@@ -111,8 +111,8 @@ final class DimensionResolver {
 		$uploads  = wp_upload_dir( null, false );
 		$prefixes = array(
 			trailingslashit( (string) $uploads['baseurl'] ) => trailingslashit( wp_normalize_path( (string) $uploads['basedir'] ) ),
-			trailingslashit( get_theme_root_uri() )         => trailingslashit( wp_normalize_path( get_theme_root() ) ),
-			trailingslashit( plugins_url() )                => trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ),
+			trailingslashit( get_theme_root_uri() ) => trailingslashit( wp_normalize_path( get_theme_root() ) ),
+			trailingslashit( plugins_url() )        => trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ),
 		);
 
 		$roots = array_values( $prefixes );
@@ -254,7 +254,7 @@ final class DimensionResolver {
 		if ( count( $map ) <= $max ) {
 			return $map;
 		}
-		return array_slice( $map, -(int) floor( $max * 0.75 ), null, true );
+		return array_slice( $map, - (int) floor( $max * 0.75 ), null, true );
 	}
 
 	/**

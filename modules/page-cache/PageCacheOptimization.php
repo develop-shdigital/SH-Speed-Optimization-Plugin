@@ -230,7 +230,7 @@ final class PageCacheOptimization extends AbstractOptimization {
 			}
 		}
 
-		$cache->preloader()->schedule();
+		$cache->preloader()->schedule( true );
 
 		return true;
 	}

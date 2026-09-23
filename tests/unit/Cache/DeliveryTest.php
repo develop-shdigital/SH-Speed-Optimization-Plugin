@@ -432,7 +432,7 @@ final class DeliveryTest extends TestCase {
 		$body    = "<html>\n<body>line1\nline2</body></html>";
 		$encoded = Delivery::encode_entry( $meta, $body );
 
-		$this->assertSame( 1, substr_count( strstr( $encoded, "\n", true ), '{' ) >= 1 ? 1 : 0 );
+		$this->assertIsArray( json_decode( (string) strstr( $encoded, "\n", true ), true ), 'First line is the JSON metadata.' );
 		$decoded = Delivery::decode_entry( $encoded );
 		$this->assertSame( $body, $decoded['body'] );
 		$this->assertSame( 'https://example.test/', $decoded['meta']['url'] );

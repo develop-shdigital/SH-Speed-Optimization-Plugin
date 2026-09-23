@@ -66,6 +66,8 @@ final class SpeculativePrefetchOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		if ( self::core_handles() ) {
@@ -85,6 +87,8 @@ final class SpeculativePrefetchOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		if ( self::core_handles() ) {

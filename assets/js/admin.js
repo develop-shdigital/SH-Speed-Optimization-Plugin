@@ -514,10 +514,10 @@
 			{ class: 'shso-metric' },
 			h( 'span', { class: 'shso-metric__name' },
 				h( 'abbr', { title: meta.name }, meta.abbr ),
-				srText( ' (' + meta.name + ')' ),
-				meta.hint ? h( 'span', { class: 'shso-metric__hint' }, meta.hint ) : null
+				srText( ' (' + meta.name + ')' )
 			),
 			h( 'span', { class: 'shso-metric__value' }, display || [ h( 'span', { 'aria-hidden': 'true' }, '—' ), srText( __( 'Not measured', 'sh-speed-optimizer' ) ) ] ),
+			h( 'span', { class: 'shso-metric__hint' }, meta.hint || '' ),
 			pill( status.tone, status.label )
 		);
 	}
@@ -1048,7 +1048,12 @@
 			document.body.classList.remove( 'shso-modal-open' );
 			this.setBackgroundInert( false );
 			clear( this.els.harness );
-			const target = this.lastFocus && document.body.contains( this.lastFocus ) ? this.lastFocus : $( '.shso-header__title' );
+			// The page re-renders after a job: fall back to the re-rendered trigger (same id), then the page title.
+			let target = this.lastFocus && document.body.contains( this.lastFocus ) ? this.lastFocus : null;
+			if ( ! target && this.lastFocus && this.lastFocus.id ) {
+				target = document.getElementById( this.lastFocus.id );
+			}
+			target = target || $( '.shso-header__title' );
 			if ( target && 'function' === typeof target.focus ) {
 				if ( ! target.hasAttribute( 'tabindex' ) && ! /^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test( target.tagName ) ) {
 					target.setAttribute( 'tabindex', '-1' );

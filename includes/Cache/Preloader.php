@@ -71,21 +71,26 @@ final class Preloader {
 
 	/**
 	 * Whether preloading may run.
+	 *
+	 * @param bool $require_active Also require the page cache to be active (false while it is being applied).
 	 */
-	public function enabled(): bool {
+	public function enabled( bool $require_active = true ): bool {
 		$settings = $this->plugin->settings();
 		return ! Context::is_emergency_safe_mode()
 			&& (bool) $settings->get( 'preload', true )
 			&& (int) $settings->get( 'preload_limit', 50 ) > 0
 			&& (bool) $settings->get( 'page_cache', true )
-			&& $this->plugin->state()->is_active( 'page_cache' );
+			&& ( ! $require_active || $this->plugin->state()->is_active( 'page_cache' ) );
 	}
 
 	/**
 	 * Start a full preload (the URL list is built in the background).
+	 *
+	 * @param bool $applying Called while the page cache is being applied (not active yet; the
+	 *                       background run re-checks and does nothing if it was rolled back).
 	 */
-	public function schedule(): void {
-		if ( ! $this->enabled() ) {
+	public function schedule( bool $applying = false ): void {
+		if ( ! $this->enabled( ! $applying ) ) {
 			return;
 		}
 		$state            = $this->state();

@@ -250,8 +250,8 @@ final class ConversionQueue {
 		if ( ! is_array( $record ) ) {
 			return;
 		}
-		$state          = $this->state();
-		$state['stats'] = self::apply_delta( $state['stats'], ImageConverter::totals( $record ), ImageConverter::totals( null ), false );
+		$state                         = $this->state();
+		$state['stats']                = self::apply_delta( $state['stats'], ImageConverter::totals( $record ), ImageConverter::totals( null ), false );
 		$state['stats']['attachments'] = max( 0, (int) $state['stats']['attachments'] - 1 );
 		$this->save( $state );
 	}

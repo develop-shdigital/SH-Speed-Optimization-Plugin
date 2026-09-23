@@ -249,7 +249,7 @@ final class Capture {
 			'no_query'       => empty( $facts['query_ran'] ),
 			'donotcachepage' => ! empty( $facts['donotcache'] ),
 			'logged_in'      => ! empty( $facts['logged_in'] ),
-			'404'            => ! empty( $facts['is_404'] ),
+			'not_found'      => ! empty( $facts['is_404'] ),
 			'search'         => ! empty( $facts['is_search'] ),
 			'feed'           => ! empty( $facts['is_feed'] ),
 			'preview'        => ! empty( $facts['is_preview'] ),
@@ -330,7 +330,7 @@ final class Capture {
 		 * Fires when a page was rendered but not stored in the page cache.
 		 *
 		 * @param string $url    Page URL.
-		 * @param string $reason Reason code (logged_in, set_cookie, cache_control, 404, woocommerce …).
+		 * @param string $reason Reason code (logged_in, set_cookie, cache_control, not_found, woocommerce …).
 		 */
 		do_action( 'shso_url_excluded', $url, $reason );
 

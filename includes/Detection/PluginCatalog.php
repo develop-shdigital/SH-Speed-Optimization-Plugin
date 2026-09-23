@@ -76,7 +76,7 @@ final class PluginCatalog {
 		);
 
 		$definitions = array(
-			'wp-rocket'                   => array(
+			'wp-rocket'                  => array(
 				'WP Rocket',
 				array( 'page_cache', 'browser_cache', 'minify_css', 'minify_js', 'defer_js', 'delay_js', 'lazy_load', 'critical_css', 'preload', 'font_optimization', 'cdn', 'heartbeat', 'cleanup', 'emojis', 'embeds' ),
 				array(
@@ -95,7 +95,7 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'litespeed-cache'             => array(
+			'litespeed-cache'            => array(
 				'LiteSpeed Cache',
 				array( 'page_cache', 'minify_css', 'minify_js', 'defer_js', 'delay_js', 'lazy_load', 'webp', 'critical_css', 'font_optimization', 'browser_cache', 'cleanup', 'emojis', 'heartbeat' ),
 				array(
@@ -112,7 +112,7 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'w3-total-cache'              => array(
+			'w3-total-cache'             => array(
 				'W3 Total Cache',
 				array( 'page_cache', 'browser_cache', 'minify_css', 'minify_js', 'lazy_load', 'cdn' ),
 				array(
@@ -123,13 +123,13 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'wp-super-cache'              => array(
+			'wp-super-cache'             => array(
 				'WP Super Cache',
 				array( 'page_cache' ),
 				array( 'page_cache' => array( 'global:cache_enabled' ) ),
 				array(),
 			),
-			'wp-fastest-cache'            => array(
+			'wp-fastest-cache'           => array(
 				'WP Fastest Cache',
 				array( 'page_cache', 'minify_css', 'minify_js', 'browser_cache', 'lazy_load' ),
 				array(
@@ -141,7 +141,7 @@ final class PluginCatalog {
 				),
 				array( 'emojis' => array( $wpfc . '[wpFastestCacheDisableEmojis]' ) ),
 			),
-			'autoptimize'                 => array(
+			'autoptimize'                => array(
 				'Autoptimize',
 				array( 'minify_css', 'minify_js', 'defer_js', 'critical_css', 'lazy_load', 'font_optimization', 'cleanup', 'emojis' ),
 				array(
@@ -155,19 +155,19 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'flying-press'                => array(
+			'flying-press'               => array(
 				'FlyingPress',
 				array( 'page_cache', 'minify_css', 'minify_js', 'defer_js', 'delay_js', 'lazy_load', 'critical_css', 'font_optimization', 'preload', 'cdn' ),
 				array(),
 				array(),
 			),
-			'nitropack'                   => array(
+			'nitropack'                  => array(
 				'NitroPack',
 				array( 'page_cache', 'browser_cache', 'webp', 'lazy_load', 'minify_css', 'minify_js', 'defer_js', 'delay_js', 'critical_css', 'cdn', 'font_optimization', 'image_optimization', 'preload' ),
 				array(),
 				array(),
 			),
-			'sg-cachepress'               => array(
+			'sg-cachepress'              => array(
 				'SiteGround Optimizer',
 				array( 'page_cache', 'minify_css', 'minify_js', 'defer_js', 'lazy_load', 'webp', 'font_optimization', 'heartbeat', 'cleanup', 'emojis' ),
 				array(
@@ -184,15 +184,15 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'tenweb-speed-optimizer'      => array(
+			'tenweb-speed-optimizer'     => array(
 				'10Web Booster',
 				array( 'page_cache', 'minify_css', 'minify_js', 'defer_js', 'delay_js', 'critical_css', 'lazy_load', 'webp', 'font_optimization' ),
 				array(),
 				array(),
 			),
-			'hummingbird-performance'     => $hummingbird,
-			'wp-hummingbird'              => $hummingbird,
-			'breeze'                      => array(
+			'hummingbird-performance'    => $hummingbird,
+			'wp-hummingbird'             => $hummingbird,
+			'breeze'                     => array(
 				'Breeze',
 				array( 'page_cache', 'minify_css', 'minify_js', 'browser_cache', 'lazy_load', 'heartbeat' ),
 				array(
@@ -204,14 +204,14 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'cache-enabler'               => array( 'Cache Enabler', array( 'page_cache' ), array(), array() ),
-			'comet-cache'                 => array( 'Comet Cache', array( 'page_cache' ), array(), array() ),
-			'comet-cache-pro'             => array( 'Comet Cache Pro', array( 'page_cache' ), array(), array() ),
-			'wp-cloudflare-page-cache'    => array( 'Super Page Cache', array( 'page_cache' ), array(), array() ),
-			'powered-cache'               => array( 'Powered Cache', array( 'page_cache', 'minify_css', 'minify_js' ), array(), array() ),
-			'swift-performance-lite'      => $swift,
-			'swift-performance'           => $swift,
-			'perfmatters'                 => array(
+			'cache-enabler'              => array( 'Cache Enabler', array( 'page_cache' ), array(), array() ),
+			'comet-cache'                => array( 'Comet Cache', array( 'page_cache' ), array(), array() ),
+			'comet-cache-pro'            => array( 'Comet Cache Pro', array( 'page_cache' ), array(), array() ),
+			'wp-cloudflare-page-cache'   => array( 'Super Page Cache', array( 'page_cache' ), array(), array() ),
+			'powered-cache'              => array( 'Powered Cache', array( 'page_cache', 'minify_css', 'minify_js' ), array(), array() ),
+			'swift-performance-lite'     => $swift,
+			'swift-performance'          => $swift,
+			'perfmatters'                => array(
 				'Perfmatters',
 				array( 'cleanup', 'emojis', 'embeds', 'jquery_migrate', 'head_cleanup', 'heartbeat', 'delay_js', 'defer_js', 'lazy_load', 'font_optimization', 'preload' ),
 				array(
@@ -229,7 +229,7 @@ final class PluginCatalog {
 				),
 				array( 'cdn' => array( $pm . '[cdn][enable_cdn]' ) ),
 			),
-			'jetpack-boost'               => array(
+			'jetpack-boost'              => array(
 				'Jetpack Boost',
 				array( 'critical_css', 'defer_js', 'image_optimization' ),
 				array(
@@ -243,7 +243,7 @@ final class PluginCatalog {
 					'minify_js'  => array( 'jetpack_boost_status_minify-js' ),
 				),
 			),
-			'wp-optimize'                 => array(
+			'wp-optimize'                => array(
 				'WP-Optimize',
 				array( 'page_cache', 'minify_css', 'minify_js', 'webp', 'database_cleanup' ),
 				array(
@@ -252,8 +252,8 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'clearfy'                     => array( 'Clearfy', array( 'cleanup', 'heartbeat' ), array(), array() ),
-			'wp-asset-clean-up'           => array(
+			'clearfy'                    => array( 'Clearfy', array( 'cleanup', 'heartbeat' ), array(), array() ),
+			'wp-asset-clean-up'          => array(
 				'Asset CleanUp',
 				array( 'minify_css', 'minify_js', 'defer_js', 'cleanup' ),
 				array(
@@ -262,7 +262,7 @@ final class PluginCatalog {
 				),
 				array( 'emojis' => array( 'wpassetcleanup_settings[disable_emojis]?' ) ),
 			),
-			'wp-asset-clean-up-pro'       => array(
+			'wp-asset-clean-up-pro'      => array(
 				'Asset CleanUp Pro',
 				array( 'minify_css', 'minify_js', 'defer_js', 'cleanup' ),
 				array(
@@ -271,17 +271,17 @@ final class PluginCatalog {
 				),
 				array( 'emojis' => array( 'wpassetcleanup_settings[disable_emojis]?' ) ),
 			),
-			'flying-scripts'              => array( 'Flying Scripts', array( 'delay_js' ), array(), array() ),
-			'flying-pages'                => array( 'Flying Pages', array( 'preload' ), array(), array() ),
-			'a3-lazy-load'                => array( 'a3 Lazy Load', array( 'lazy_load' ), array(), array() ),
-			'rocket-lazy-load'            => array( 'Lazy Load by WP Rocket', array( 'lazy_load' ), array(), array() ),
-			'wp-smushit'                  => array(
+			'flying-scripts'             => array( 'Flying Scripts', array( 'delay_js' ), array(), array() ),
+			'flying-pages'               => array( 'Flying Pages', array( 'preload' ), array(), array() ),
+			'a3-lazy-load'               => array( 'a3 Lazy Load', array( 'lazy_load' ), array(), array() ),
+			'rocket-lazy-load'           => array( 'Lazy Load by WP Rocket', array( 'lazy_load' ), array(), array() ),
+			'wp-smushit'                 => array(
 				'Smush',
 				array( 'lazy_load', 'image_optimization' ),
 				array( 'lazy_load' => array( 'wp-smush-settings[lazy_load]?' ) ),
 				array( 'webp' => array( 'wp-smush-settings[webp_mod]?' ) ),
 			),
-			'wp-smush-pro'                => array(
+			'wp-smush-pro'               => array(
 				'Smush Pro',
 				array( 'lazy_load', 'image_optimization', 'webp' ),
 				array(
@@ -290,7 +290,7 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'ewww-image-optimizer'        => array(
+			'ewww-image-optimizer'       => array(
 				'EWWW Image Optimizer',
 				array( 'webp', 'image_optimization', 'lazy_load' ),
 				array(
@@ -299,24 +299,24 @@ final class PluginCatalog {
 				),
 				array(),
 			),
-			'shortpixel-image-optimiser'  => array( 'ShortPixel Image Optimizer', array( 'webp', 'image_optimization' ), array(), array() ),
-			'shortpixel-adaptive-images'  => array( 'ShortPixel Adaptive Images', array( 'webp', 'lazy_load', 'cdn', 'image_optimization' ), array(), array() ),
-			'imagify'                     => array(
+			'shortpixel-image-optimiser' => array( 'ShortPixel Image Optimizer', array( 'webp', 'image_optimization' ), array(), array() ),
+			'shortpixel-adaptive-images' => array( 'ShortPixel Adaptive Images', array( 'webp', 'lazy_load', 'cdn', 'image_optimization' ), array(), array() ),
+			'imagify'                    => array(
 				'Imagify',
 				array( 'webp', 'image_optimization' ),
 				array( 'webp' => array( 'imagify_settings[display_nextgen]?', 'imagify_settings[display_webp]?' ) ),
 				array(),
 			),
-			'optimole-wp'                 => array( 'Optimole', array( 'webp', 'lazy_load', 'image_optimization', 'cdn' ), array(), array() ),
-			'webp-express'                => array( 'WebP Express', array( 'webp' ), array(), array() ),
-			'webp-converter-for-media'    => array( 'Converter for Media', array( 'webp' ), array(), array() ),
-			'webp-uploads'                => array( 'Modern Image Formats', array( 'webp' ), array(), array() ),
-			'tiny-compress-images'        => array( 'TinyPNG', array( 'image_optimization' ), array(), array() ),
-			'heartbeat-control'           => array( 'Heartbeat Control', array( 'heartbeat' ), array(), array() ),
-			'host-webfonts-local'         => array( 'OMGF', array( 'font_optimization' ), array(), array() ),
-			'local-google-fonts'          => array( 'Local Google Fonts', array( 'font_optimization' ), array(), array() ),
-			'cloudflare'                  => array( 'Cloudflare', array( 'page_cache' ), array(), array() ),
-			'varnish-http-purge'          => array( 'Proxy Cache Purge', array(), array(), array() ),
+			'optimole-wp'                => array( 'Optimole', array( 'webp', 'lazy_load', 'image_optimization', 'cdn' ), array(), array() ),
+			'webp-express'               => array( 'WebP Express', array( 'webp' ), array(), array() ),
+			'webp-converter-for-media'   => array( 'Converter for Media', array( 'webp' ), array(), array() ),
+			'webp-uploads'               => array( 'Modern Image Formats', array( 'webp' ), array(), array() ),
+			'tiny-compress-images'       => array( 'TinyPNG', array( 'image_optimization' ), array(), array() ),
+			'heartbeat-control'          => array( 'Heartbeat Control', array( 'heartbeat' ), array(), array() ),
+			'host-webfonts-local'        => array( 'OMGF', array( 'font_optimization' ), array(), array() ),
+			'local-google-fonts'         => array( 'Local Google Fonts', array( 'font_optimization' ), array(), array() ),
+			'cloudflare'                 => array( 'Cloudflare', array( 'page_cache' ), array(), array() ),
+			'varnish-http-purge'         => array( 'Proxy Cache Purge', array(), array(), array() ),
 		);
 
 		return $definitions;
@@ -342,7 +342,7 @@ final class PluginCatalog {
 			if ( ! isset( $index[ $key ] ) ) {
 				continue;
 			}
-			$definition = $definitions[ $index[ $key ] ];
+			$definition            = $definitions[ $index[ $key ] ];
 			$out[ (string) $slug ] = array(
 				'name'     => $definition[0],
 				'features' => self::refine( $index[ $key ], $definition[1], $lookup ),
@@ -466,9 +466,9 @@ final class PluginCatalog {
 	/**
 	 * Keep a feature when any path is on, or when none can be read; drop it when all readable paths are off.
 	 *
-	 * @param string[]                $features Features.
-	 * @param array<string,string[]>  $map      Feature => paths.
-	 * @param callable                $check    function( string $path ): ?bool.
+	 * @param string[]               $features Features.
+	 * @param array<string,string[]> $map      Feature => paths.
+	 * @param callable               $check    function( string $path ): ?bool.
 	 * @return string[]
 	 */
 	private static function apply_map( array $features, array $map, callable $check ): array {

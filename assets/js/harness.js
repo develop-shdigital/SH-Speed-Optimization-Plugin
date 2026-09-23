@@ -124,15 +124,24 @@
 		} );
 	}
 
+	var aborted = false;
+
 	window.SHSOHarness = {
+		abort: function () {
+			aborted = true;
+		},
 		run: function ( plan, options ) {
 			options = options || {};
+			aborted = false;
 			var results = {};
 			var list = Array.isArray( plan ) ? plan : [];
 			var total = list.length;
 			var index = 0;
 
 			function next() {
+				if ( aborted ) {
+					return Promise.resolve( { _unavailable: true } );
+				}
 				if ( index >= total ) {
 					return Promise.resolve( results );
 				}

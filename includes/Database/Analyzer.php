@@ -137,6 +137,19 @@ final class Analyzer {
 		if ( is_array( $row ) ) {
 			$parents   = max( 0, (int) ( $row['parents'] ?? 0 ) );
 			$removable = max( 0, (int) ( $row['revs'] ?? 0 ) - $parents * $keep );
+		} else {
+			// Engines without derived tables: one small row per post with too many revisions.
+			$groups = $this->results(
+				"SELECT post_parent, COUNT(*) AS c FROM {$posts} WHERE {$where} GROUP BY post_parent HAVING COUNT(*) > %d",
+				array_merge( $args, array( $keep ) )
+			);
+			if ( ! empty( $groups ) || $this->last_query_succeeded() ) {
+				$parents   = count( $groups );
+				$removable = 0;
+				foreach ( $groups as $group ) {
+					$removable += max( 0, (int) $group['c'] - $keep );
+				}
+			}
 		}
 
 		return array(
@@ -545,6 +558,13 @@ final class Analyzer {
 
 		$this->post_taxonomies = $result;
 		return $result;
+	}
+
+	/**
+	 * Whether the last query ran without a database error.
+	 */
+	private function last_query_succeeded(): bool {
+		return '' === (string) ( $this->wpdb->last_error ?? '' );
 	}
 
 	/**

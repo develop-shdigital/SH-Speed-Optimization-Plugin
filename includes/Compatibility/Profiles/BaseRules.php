@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 final class BaseRules {
 
 	/**
-	 * jQuery core: inline scripts everywhere call jQuery() immediately.
+	 * The jQuery core: inline scripts everywhere call jQuery() immediately.
 	 */
 	public const JQUERY = array( 'jquery-core', 'jquery.min.js', 'jquery.js' );
 

@@ -48,6 +48,12 @@
 	box-sizing: border-box;
 }
 
+/* Component display rules must never override the hidden attribute. */
+.shso-wrap [hidden],
+.shso-modal [hidden] {
+	display: none !important;
+}
+
 /* ---------------------------------------------------------------------
  * Header and navigation
  * ------------------------------------------------------------------ */
@@ -92,6 +98,11 @@
 	font-size: 23px;
 	font-weight: 600;
 	line-height: 1.25;
+}
+
+/* Programmatic focus target (tabindex="-1") after closing the progress dialog. */
+.shso-wrap .shso-header__title:focus {
+	outline: none;
 }
 
 .shso-nav {
@@ -163,6 +174,17 @@
 .shso-section {
 	display: flex;
 	flex-direction: column;
+	gap: 12px;
+}
+
+.shso-slot {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 0;
+}
+
+.shso-card > .shso-slot {
 	gap: 12px;
 }
 
@@ -290,6 +312,10 @@
 
 .shso-notices:empty {
 	display: none;
+}
+
+.shso-notices:not(:empty) {
+	margin-bottom: 16px;
 }
 
 .shso-banner {
@@ -539,9 +565,9 @@
 
 .shso-metric {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto auto;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	gap: 4px 10px;
+	gap: 2px 10px;
 	margin: 0;
 	padding: 8px 0;
 	border-top: 1px solid var(--shso-canvas);
@@ -563,10 +589,13 @@
 }
 
 .shso-metric__hint {
-	display: block;
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--shso-muted);
+}
+
+.shso-metric .shso-pill {
+	justify-self: end;
 }
 
 .shso-metric__value {
@@ -898,10 +927,13 @@
 
 .shso-switch__input {
 	position: absolute;
+	top: 50%;
+	left: 0;
+	z-index: 1;
 	opacity: 0;
 	width: 36px;
 	height: 20px;
-	margin: 0;
+	margin: -10px 0 0;
 	cursor: pointer;
 }
 
@@ -1193,6 +1225,10 @@
 	font-size: 13px;
 }
 
+.shso-slot .shso-metrics {
+	max-width: 560px;
+}
+
 .shso-psi-scores {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(min(100%, 130px), 1fr));
@@ -1254,6 +1290,10 @@
 
 .shso-settings__section > legend + * {
 	clear: both;
+}
+
+.shso-settings__section > .shso-field__help:not(.shso-field) {
+	margin-bottom: 8px;
 }
 
 .shso-field {
@@ -1609,15 +1649,6 @@ body.shso-modal-open {
 @media (max-width: 480px) {
 	.shso-score__value {
 		font-size: 42px;
-	}
-
-	.shso-metric {
-		grid-template-columns: minmax(0, 1fr) auto;
-	}
-
-	.shso-metric .shso-pill {
-		grid-column: 1 / -1;
-		justify-self: start;
 	}
 
 	.shso-modal {

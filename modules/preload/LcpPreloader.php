@@ -128,10 +128,10 @@ final class LcpPreloader {
 		}
 
 		/** Matched image tag. @var Tag $tag */
-		$tag       = $match['tag'];
-		$js_lazy   = self::uses_js_lazy_loader( $tag );
-		$changed   = false;
-		$target    = $match['index'];
+		$tag     = $match['tag'];
+		$js_lazy = self::uses_js_lazy_loader( $tag );
+		$changed = false;
+		$target  = $match['index'];
 
 		if ( ! $js_lazy ) {
 			$changed = $doc->replace_tags(

@@ -351,8 +351,15 @@ final class AssetSource {
 			}
 		}
 
-		$slug = 'other';
-		foreach ( (array) $env['roots'] as $root ) {
+		$slug  = 'other';
+		$roots = (array) $env['roots'];
+		usort(
+			$roots,
+			static function ( $a, $b ) {
+				return strlen( (string) $b ) <=> strlen( (string) $a ); // Most specific root first.
+			}
+		);
+		foreach ( $roots as $root ) {
 			$relative = self::relative_to( $real, (string) $root );
 			if ( null !== $relative && false !== strpos( $relative, '/' ) ) {
 				$slug = self::slug( explode( '/', $relative )[0] );

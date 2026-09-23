@@ -181,7 +181,7 @@ final class Schema {
 		$parts = array();
 		foreach ( self::primary_key( $table ) as $column ) {
 			$value = $row[ $column ] ?? null;
-			if ( ! is_scalar( $value ) || ! preg_match( '/^[0-9]{1,19}$/', (string) $value ) ) {
+			if ( ! is_scalar( $value ) || ! preg_match( '/^[0-9]{1,19}\z/', (string) $value ) ) {
 				return null;
 			}
 			$normalized = ltrim( (string) $value, '0' );

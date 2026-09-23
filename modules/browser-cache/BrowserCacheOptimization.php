@@ -180,7 +180,7 @@ final class BrowserCacheOptimization extends AbstractOptimization {
 			return __( 'Your site did not respond normally after the browser caching rules were added.', 'sh-speed-optimizer' );
 		}
 		$expected = (int) ( $baseline['status'] ?? 0 );
-		if ( $expected >= 200 && $expected < 400 && (int) $home['status'] !== $expected ) {
+		if ( $expected >= 200 && $expected < 300 && ( (int) $home['status'] < 200 || (int) $home['status'] >= 300 ) ) {
 			return __( 'Your home page answered differently after the browser caching rules were added.', 'sh-speed-optimizer' );
 		}
 

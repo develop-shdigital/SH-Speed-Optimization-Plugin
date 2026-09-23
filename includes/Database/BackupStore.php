@@ -37,8 +37,8 @@ final class BackupStore {
 
 	public const FORMAT       = 'shso-db-backup';
 	public const VERSION      = 1;
-	public const ID_PATTERN   = '/^db-[0-9]{8}-[0-9]{6}-[a-f0-9]{16}$/';
-	public const PART_PATTERN = '/^part-[0-9]{4,6}\.json\.gz$/';
+	public const ID_PATTERN   = '/^db-[0-9]{8}-[0-9]{6}-[a-f0-9]{16}\z/';
+	public const PART_PATTERN = '/^part-[0-9]{4,6}\.json\.gz\z/';
 	public const MANIFEST     = 'manifest.json';
 	public const STATUSES     = array( 'in_progress', 'complete', 'partial' );
 
@@ -469,7 +469,7 @@ final class BackupStore {
 		foreach ( (array) ( $manifest['parts'] ?? array() ) as $part ) {
 			$file = is_array( $part ) ? (string) ( $part['file'] ?? '' ) : '';
 			if ( ! preg_match( self::PART_PATTERN, $file ) || isset( $files[ $file ] )
-				|| ! preg_match( '/^[a-f0-9]{64}$/', (string) ( $part['sha256'] ?? '' ) )
+				|| ! preg_match( '/^[a-f0-9]{64}\z/', (string) ( $part['sha256'] ?? '' ) )
 				|| ! in_array( $part['item'] ?? '', Cleaner::ITEMS, true ) ) {
 				return self::corrupt();
 			}

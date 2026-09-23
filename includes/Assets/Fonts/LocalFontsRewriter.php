@@ -157,8 +157,14 @@ final class LocalFontsRewriter {
 	 * @param HtmlDocument $doc Document.
 	 */
 	private function remove_unused_hints( HtmlDocument $doc ): void {
-		$pattern = '#<link\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*\brel\s*=\s*["\']?[^"\'>]*(?:preconnect|dns-prefetch)(?:[^>"\']|"[^"]*"|\'[^\']*\')*>#i';
-		$rest    = (string) preg_replace( $pattern, '', $doc->html() );
+		$rest = (string) preg_replace_callback(
+			'#<link\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*>#i',
+			static function ( $m ) {
+				$tag = Tag::parse( $m[0] );
+				return null !== $tag && ( self::rel_has( $tag, 'preconnect' ) || self::rel_has( $tag, 'dns-prefetch' ) ) ? '' : $m[0];
+			},
+			$doc->html()
+		);
 
 		$unused = array();
 		foreach ( array( GoogleFonts::CSS_HOST, GoogleFonts::FONT_HOST ) as $host ) {

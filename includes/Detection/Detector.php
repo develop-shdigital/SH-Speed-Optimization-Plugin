@@ -121,19 +121,23 @@ final class Detector {
 			)
 		);
 
-		$hosting = $this->step(
-			'hosting',
-			static function () use ( $lookup ) {
-				return HostingDetector::detect( $lookup );
-			},
+		$hosting = array_merge(
+			$this->step(
+				'hosting',
+				static function () use ( $lookup ) {
+					return HostingDetector::detect( $lookup );
+				},
+				array(
+					'provider'      => null,
+					'provider_name' => null,
+					'page_cache'    => false,
+				)
+			),
 			array(
-				'provider'      => null,
-				'provider_name' => null,
-				'page_cache'    => false,
+				'cdn'          => null,
+				'server_cache' => null,
 			)
 		);
-		$hosting['cdn']          = null;
-		$hosting['server_cache'] = null;
 		$profile->set( 'hosting', $hosting );
 
 		/**

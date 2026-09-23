@@ -290,7 +290,7 @@ final class CompatibilityManager {
 	}
 
 	/**
-	 * applies() guarded against exceptions.
+	 * Call applies() guarded against exceptions.
 	 *
 	 * @param ProfileInterface $profile Profile.
 	 */

@@ -207,7 +207,7 @@ final class QueryReport {
 	 */
 	private static function component_of( array $query ): string {
 		$data = $query[4] ?? null;
-		if ( is_array( $data ) && is_string( $data[ self::DATA_KEY ] ?? null ) && preg_match( '/^(?:core|unknown|(?:plugin|mu-plugin|theme):[A-Za-z0-9._\-]{1,100})$/', $data[ self::DATA_KEY ] ) ) {
+		if ( is_array( $data ) && is_string( $data[ self::DATA_KEY ] ?? null ) && preg_match( '/^(?:core|unknown|(?:plugin|mu-plugin|theme):[A-Za-z0-9._\-]{1,100})\z/', $data[ self::DATA_KEY ] ) ) {
 			return $data[ self::DATA_KEY ];
 		}
 		return 'unknown';

@@ -146,7 +146,7 @@ final class ImageLazyLoader {
 					return null;
 				}
 
-				$position = array(
+				$position   = array(
 					'first'     => ! $first_seen,
 					'in_header' => MarkupRanges::inside( (int) $info['offset'], $headers ),
 					'index'     => 0,
@@ -181,8 +181,8 @@ final class ImageLazyLoader {
 	/**
 	 * Decide what to do with an image.
 	 *
-	 * @param Tag                                           $tag      Image tag.
-	 * @param array{first:bool,in_header:bool,index:int}    $position Position: first image of the body, inside <header>, content index (1-based, 0 = not a content image).
+	 * @param Tag                                        $tag      Image tag.
+	 * @param array{first:bool,in_header:bool,index:int} $position Position: first image of the body, inside <header>, content index (1-based, 0 = not a content image).
 	 * @return array{0:string,1:string} Action and reason.
 	 */
 	public function decide( Tag $tag, array $position ): array {

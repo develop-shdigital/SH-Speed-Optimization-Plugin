@@ -236,6 +236,28 @@ final class Cleaner implements JobHandlerInterface {
 	}
 
 	/**
+	 * Cursor after a batch.
+	 *
+	 * Ids that were not processed (time budget) are selected again next time.
+	 * A revision batch that removed nothing skips ahead, so rows that cannot
+	 * be deleted can never cause an endless loop.
+	 *
+	 * @param string                                    $key     Step key.
+	 * @param array{cursor:int,skip:int}                $batch   Batch (see plan_revisions()).
+	 * @param array{deleted:int,last:int,complete:bool} $result  Deletion result.
+	 * @param int                                       $current Current cursor.
+	 */
+	public static function next_cursor( string $key, array $batch, array $result, int $current ): int {
+		if ( 'revisions' === $key ) {
+			if ( 0 === (int) $result['deleted'] ) {
+				return (int) $batch['skip'];
+			}
+			return $result['complete'] ? (int) $batch['cursor'] : $current;
+		}
+		return $result['complete'] ? (int) $batch['cursor'] : max( $current, (int) $result['last'] );
+	}
+
+	/**
 	 * Cleanup item a step key belongs to.
 	 *
 	 * @param string $key Step key (item or "expired_site_transients").
@@ -450,19 +472,7 @@ final class Cleaner implements JobHandlerInterface {
 		$deleted[ $item ] = (int) ( $deleted[ $item ] ?? 0 ) + $result['deleted'];
 		$job->set( 'deleted', $deleted );
 
-		// Advance the cursor. Unprocessed ids (time budget) are selected again next time.
-		// A batch that removed nothing skips ahead, so failing rows can never cause an endless loop.
-		if ( 'revisions' === $key ) {
-			if ( 0 === $result['deleted'] ) {
-				$cursor = $batch['skip'];
-			} elseif ( $result['complete'] ) {
-				$cursor = $batch['cursor'];
-			} else {
-				$cursor = (int) $job->get( 'cursor_revisions', 0 );
-			}
-		} else {
-			$cursor = $result['complete'] ? $batch['cursor'] : max( (int) $job->get( 'cursor_' . $key, 0 ), $result['last'] );
-		}
+		$cursor = self::next_cursor( $key, $batch, $result, (int) $job->get( 'cursor_' . $key, 0 ) );
 		$job->set( 'cursor_' . $key, $cursor );
 
 		$this->adapt_batch_size( $key, $job, microtime( true ) - $start );
@@ -539,7 +549,14 @@ final class Cleaner implements JobHandlerInterface {
 					? Criteria::auto_drafts( $now )
 					: Criteria::trashed_posts( (array) $job->get( 'excluded', Criteria::excluded_post_types() ) );
 				$sql                  = "SELECT p.ID AS id, LENGTH(p.post_content) + COALESCE((SELECT SUM(LENGTH(pm.meta_value)) FROM {$wpdb->postmeta} pm WHERE pm.post_id = p.ID), 0) AS bytes FROM {$wpdb->posts} p WHERE {$where} AND p.ID > %d ORDER BY p.ID ASC LIMIT %d";
-				break;
+				$params               = array_merge( $args, array( $cursor, $limit ) );
+				try {
+					$rows = $this->select( $sql, $params );
+				} catch ( \RuntimeException $e ) {
+					// Database engines without correlated subqueries: measure the content only.
+					$rows = $this->select( "SELECT p.ID AS id, LENGTH(p.post_content) AS bytes FROM {$wpdb->posts} p WHERE {$where} AND p.ID > %d ORDER BY p.ID ASC LIMIT %d", $params );
+				}
+				return self::batch_from_rows( $rows, $cursor, $limit );
 
 			case 'spam_comments':
 			case 'trashed_comments':
@@ -622,24 +639,51 @@ final class Cleaner implements JobHandlerInterface {
 			return self::empty_batch( $cursor );
 		}
 
-		$selected = array();
-		$bytes    = 0;
-		$next     = $cursor;
-		$full     = false;
-
+		$groups = array();
 		foreach ( $parents as $parent_row ) {
-			$parent = (int) $parent_row['parent'];
-			$rows   = $this->select(
+			$parent            = (int) $parent_row['parent'];
+			$groups[ $parent ] = $this->select(
 				"SELECT ID, post_parent, post_date, post_name, LENGTH(post_content) AS bytes FROM {$wpdb->posts} WHERE {$where} AND post_parent = %d",
 				array_merge( $args, array( $parent ) )
 			);
+		}
+
+		return self::plan_revisions( $groups, $cursor, $limit, $keep, count( $parents ) >= $parent_limit );
+	}
+
+	/**
+	 * Plan the next batch of revisions from the revisions of consecutive posts.
+	 *
+	 * The cursor is the id of the next post to look at (inclusive). A batch
+	 * that stops inside a post continues with that post next time; "skip"
+	 * is the cursor to use when a batch removed nothing, so failing rows can
+	 * never cause an endless loop.
+	 *
+	 * @param array<int,array<int,array<string,mixed>>> $groups       Post id => revision rows (ID, post_parent, post_date, post_name, bytes), ascending post ids.
+	 * @param int                                       $cursor       Current cursor.
+	 * @param int                                       $limit        Batch size.
+	 * @param int                                       $keep         Revisions kept per post.
+	 * @param bool                                      $more_posts   Whether more posts follow the given ones.
+	 * @param int                                       $max_bytes    Content bytes per batch.
+	 * @return array{ids:int[],cursor:int,more:bool,skip:int}
+	 */
+	public static function plan_revisions( array $groups, int $cursor, int $limit, int $keep, bool $more_posts, int $max_bytes = self::MAX_BATCH_BYTES ): array {
+		$selected = array();
+		$bytes    = 0;
+		$next     = $cursor;
+		$last     = $cursor - 1;
+		$full     = false;
+
+		foreach ( $groups as $parent => $rows ) {
+			$parent = (int) $parent;
+			$last   = $parent;
 			$sizes  = array();
 			foreach ( $rows as $row ) {
-				$sizes[ (int) $row['ID'] ] = (int) $row['bytes'];
+				$sizes[ (int) $row['ID'] ] = (int) ( $row['bytes'] ?? 0 );
 			}
 
 			foreach ( self::select_revisions_to_delete( $rows, $keep ) as $id ) {
-				if ( ! empty( $selected ) && ( count( $selected ) >= $limit || $bytes + $sizes[ $id ] > self::MAX_BATCH_BYTES ) ) {
+				if ( ! empty( $selected ) && ( count( $selected ) >= $limit || $bytes + $sizes[ $id ] > $max_bytes ) ) {
 					$full = true;
 					break;
 				}
@@ -658,12 +702,11 @@ final class Cleaner implements JobHandlerInterface {
 			}
 		}
 
-		$last_parent = (int) end( $parents )['parent'];
 		return array(
 			'ids'    => $selected,
 			'cursor' => $next,
-			'more'   => $full || count( $parents ) >= $parent_limit,
-			'skip'   => max( $next, ( $full ? $next : $last_parent ) + 1 ),
+			'more'   => $full || $more_posts,
+			'skip'   => max( $next, $last + 1 ),
 		);
 	}
 

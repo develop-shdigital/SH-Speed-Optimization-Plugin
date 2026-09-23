@@ -225,8 +225,8 @@ final class Facades {
 	/**
 	 * Aspect information from width/height attributes.
 	 *
-	 * @param string|null  $width   Width attribute.
-	 * @param string|null  $height  Height attribute.
+	 * @param string|null    $width   Width attribute.
+	 * @param string|null    $height  Height attribute.
 	 * @param array<int,int> $default Default ratio [ w, h ].
 	 * @return array{ratio:array{0:int,1:int},width:int,height:int,fluid:bool}
 	 */

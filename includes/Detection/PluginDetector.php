@@ -50,10 +50,10 @@ final class PluginDetector {
 	/**
 	 * Build the plugins section from raw WordPress data (pure).
 	 *
-	 * @param string[]                            $active  Active plugin files (site).
-	 * @param string[]                            $network Network-activated plugin files.
-	 * @param array<string,array<string,string>>  $headers get_plugins() result (file => headers).
-	 * @param array<string,array<string,string>>  $mu      get_mu_plugins() result (file => headers).
+	 * @param string[]                           $active  Active plugin files (site).
+	 * @param string[]                           $network Network-activated plugin files.
+	 * @param array<string,array<string,string>> $headers get_plugins() result (file => headers).
+	 * @param array<string,array<string,string>> $mu      get_mu_plugins() result (file => headers).
 	 * @return array<string,array<string,mixed>> slug => [ name, version, file, network, mu ]
 	 */
 	public static function build( array $active, array $network, array $headers, array $mu ): array {

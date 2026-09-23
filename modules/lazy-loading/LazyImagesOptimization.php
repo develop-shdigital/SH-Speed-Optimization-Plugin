@@ -66,6 +66,8 @@ final class LazyImagesOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$pages = $context->pages();
@@ -78,10 +80,10 @@ final class LazyImagesOptimization extends AbstractOptimization {
 		$missing   = 0;
 		$max_below = 0;
 		foreach ( $pages as $page ) {
-			$images     = (array) ( $page['images'] ?? array() );
-			$without    = max( 0, (int) ( $images['count'] ?? 0 ) - (int) ( $images['lazy'] ?? 0 ) - (int) ( $images['eager'] ?? 0 ) );
-			$missing   += $without;
-			$max_below  = max( $max_below, $without - ImageLazyLoader::DEFAULT_PROTECTED );
+			$images    = (array) ( $page['images'] ?? array() );
+			$without   = max( 0, (int) ( $images['count'] ?? 0 ) - (int) ( $images['lazy'] ?? 0 ) - (int) ( $images['eager'] ?? 0 ) );
+			$missing  += $without;
+			$max_below = max( $max_below, $without - ImageLazyLoader::DEFAULT_PROTECTED );
 		}
 
 		if ( 0 === $missing ) {
@@ -110,6 +112,8 @@ final class LazyImagesOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		$runtime->add_html_transform(

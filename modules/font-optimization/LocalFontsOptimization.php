@@ -80,6 +80,8 @@ final class LocalFontsOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$urls = self::urls_from_pages( $context->pages() );
@@ -130,6 +132,8 @@ final class LocalFontsOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		add_filter( 'shso_cron_hooks', array( self::class, 'cron_hooks' ) );

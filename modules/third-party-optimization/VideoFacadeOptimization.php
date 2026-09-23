@@ -91,6 +91,8 @@ final class VideoFacadeOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		$videos = array_filter(
@@ -131,6 +133,8 @@ final class VideoFacadeOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		add_filter( 'shso_cron_hooks', array( self::class, 'cron_hooks' ) );
@@ -330,8 +334,8 @@ final class VideoFacadeOptimization extends AbstractOptimization {
 					'limit_response_size' => 65536,
 				)
 			);
-			$data = is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ? null : json_decode( (string) wp_remote_retrieve_body( $response ), true );
-			$url  = is_array( $data ) ? (string) ( $data['thumbnail_url'] ?? '' ) : '';
+			$data     = is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ? null : json_decode( (string) wp_remote_retrieve_body( $response ), true );
+			$url      = is_array( $data ) ? (string) ( $data['thumbnail_url'] ?? '' ) : '';
 
 			if ( self::is_vimeo_thumbnail( $url ) ) {
 				$store['thumbs'][ $key ] = array(

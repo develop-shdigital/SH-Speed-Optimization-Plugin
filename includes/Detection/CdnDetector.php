@@ -92,7 +92,7 @@ final class CdnDetector {
 			return 'akamai';
 		}
 		if ( self::has_prefix( $h, 'fastly-' ) || isset( $h['x-fastly-request-id'] )
-			|| ( isset( $h['x-served-by'], $h['x-cache'] ) && preg_match( '/\bcache-[a-z0-9]+-[a-z]{3}\b/i', $h['x-served-by'] ) ) ) {
+			|| ( isset( $h['x-served-by'], $h['x-cache'] ) && preg_match( '/\bcache-[a-z0-9-]+-[a-z]{3}\b/i', $h['x-served-by'] ) ) ) {
 			return 'fastly';
 		}
 		if ( false !== strpos( $server, 'keycdn' ) ) {

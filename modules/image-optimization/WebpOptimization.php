@@ -96,6 +96,8 @@ final class WebpOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
 		if ( ! self::server_supports( 'image/webp' ) ) {
@@ -173,6 +175,8 @@ final class WebpOptimization extends AbstractOptimization {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Runtime $runtime Runtime.
 	 */
 	public function register_runtime( Runtime $runtime ): void {
 		add_filter( 'shso_cron_hooks', array( self::class, 'cron_hooks' ) );

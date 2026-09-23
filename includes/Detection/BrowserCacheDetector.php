@@ -22,7 +22,7 @@ final class BrowserCacheDetector {
 	/**
 	 * Parse caching headers.
 	 *
-	 * max-age wins over Expires (as in HTTP); s-maxage only applies to shared caches and is
+	 * The max-age directive wins over Expires (as in HTTP); s-maxage only applies to shared caches and is
 	 * ignored; no-store and no-cache mean the browser does not reuse the file without asking.
 	 *
 	 * @param array<string,mixed> $headers Response headers (any case).

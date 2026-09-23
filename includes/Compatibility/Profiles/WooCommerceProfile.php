@@ -109,11 +109,11 @@ final class WooCommerceProfile extends AbstractProfile {
 		$rules->add(
 			'inline_globals',
 			array(
-				'js-cookie'            => array( 'Cookies' ),
-				'photoswipe'           => array( 'PhotoSwipe' ),
+				'js-cookie'             => array( 'Cookies' ),
+				'photoswipe'            => array( 'PhotoSwipe' ),
 				'photoswipe-ui-default' => array( 'PhotoSwipeUI_Default' ),
-				'sourcebuster-js'      => array( 'sbjs' ),
-				'wc-order-attribution' => array( 'wc_order_attribution' ),
+				'sourcebuster-js'       => array( 'sbjs' ),
+				'wc-order-attribution'  => array( 'wc_order_attribution' ),
 			)
 		);
 
@@ -152,7 +152,7 @@ final class WooCommerceProfile extends AbstractProfile {
 		$permalinks = $this->env->option( 'woocommerce_permalinks', array() );
 		$permalinks = is_array( $permalinks ) ? $permalinks : array();
 
-		$bases = array(
+		$bases    = array(
 			(string) ( $permalinks['product_base'] ?? '' ),
 			(string) ( $permalinks['category_base'] ?? '' ),
 			(string) ( $permalinks['tag_base'] ?? '' ),

@@ -628,7 +628,7 @@ final class ThirdPartyCatalog {
 				'name'      => 'Microsoft Clarity',
 				'category'  => 'heatmap',
 				'url'       => array( 'clarity.ms/tag', 'www.clarity.ms' ),
-				'inline'    => array( 'clarity(', 'clarity.ms/tag' ),
+				'inline'    => array( 'clarity(', 'clarity.ms/tag', '"clarity","script"', "'clarity','script'" ),
 				'delayable' => true,
 				'stub'      => $fn_stub( 'clarity' ),
 			),

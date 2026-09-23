@@ -79,7 +79,7 @@ final class PreconnectHints {
 				$google_fonts = true;
 			}
 
-			$media = strtolower( trim( (string) $tag->get( 'media' ) ) );
+			$media          = strtolower( trim( (string) $tag->get( 'media' ) ) );
 			$blocking_media = '' === $media || in_array( $media, array( 'all', 'screen' ), true );
 			if ( $info['in_head'] && $blocking_media && ! $this->is_own( $host ) ) {
 				$this->candidate( $candidates, (string) Hints::origin( $href ), $tag->has( 'crossorigin' ) );
