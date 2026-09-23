@@ -91,6 +91,23 @@ final class OptimizationMetadataTest extends TestCase {
 		$this->assertTrue( $this->optimization( 'font_preload' )->assess( $this->context( array(), $browser ) )->applicable );
 	}
 
+	public function test_assessments_understand_raw_probe_results_and_stored_page_data(): void {
+		// Raw browser results (as the scanner passes them): no confidence, fonts under fonts.preload_candidates.
+		$raw = array(
+			'front_page' => array(
+				'lcp'   => array( 'url' => 'https://example.test/wp-content/uploads/hero.jpg', 'type' => 'img', 'in_viewport' => true ),
+				'fonts' => array( 'preload_candidates' => array( array( 'url' => 'https://example.test/wp-content/themes/t/a.woff2', 'type' => 'font/woff2' ) ) ),
+			),
+			'page'       => array( 'lcp' => array( 'url' => 'https://example.test/x.jpg', 'type' => 'img', 'in_viewport' => false ) ),
+		);
+		$this->assertSame( array( 'front_page' ), $this->optimization( 'lcp_priority' )->assess( $this->context( array(), $raw ) )->data['templates'] );
+		$this->assertTrue( $this->optimization( 'font_preload' )->assess( $this->context( array(), $raw ) )->applicable );
+
+		// The derived page data (same as the runtime uses) wins when it carries a confidence.
+		update_option( 'shso_page_data', array( 'front_page' => array( 'lcp' => array( 'url' => 'https://example.test/wp-content/uploads/hero.jpg', 'type' => 'img', 'confidence' => 60 ) ) ) );
+		$this->assertFalse( $this->optimization( 'lcp_priority' )->assess( $this->context( array(), $raw ) )->applicable );
+	}
+
 	public function test_page_analysis_based_assessments(): void {
 		$pages = array(
 			'https://example.test/' => array(

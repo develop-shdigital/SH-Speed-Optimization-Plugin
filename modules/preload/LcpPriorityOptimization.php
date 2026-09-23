@@ -72,8 +72,7 @@ final class LcpPriorityOptimization extends AbstractOptimization {
 	public function assess( AssessmentContext $context ): Assessment {
 		$templates = array();
 		foreach ( $context->browser as $template => $data ) {
-			$lcp = is_array( $data['lcp'] ?? null ) ? $data['lcp'] : array();
-			if ( ( new LcpPreloader( $lcp ) )->is_usable() ) {
+			if ( ( new LcpPreloader( self::measured_lcp( (string) $template, is_array( $data ) ? $data : array() ) ) )->is_usable() ) {
 				$templates[] = (string) $template;
 			}
 		}
@@ -96,6 +95,28 @@ final class LcpPriorityOptimization extends AbstractOptimization {
 		);
 
 		return $this->finalize( $assessment, $context );
+	}
+
+	/**
+	 * LCP measurement of a template: the derived page data entry (with its confidence) when the
+	 * scanner stored one, otherwise the raw browser result (an image LCP inside the viewport
+	 * counts as confidence 85, like the scanner's own rule).
+	 *
+	 * @param string              $template Template key.
+	 * @param array<string,mixed> $data     Browser result of the template.
+	 * @return array<string,mixed>
+	 */
+	public static function measured_lcp( string $template, array $data ): array {
+		$page_data = get_option( Runtime::PAGE_DATA_OPTION, array() );
+		$stored    = is_array( $page_data ) && is_array( $page_data[ $template ]['lcp'] ?? null ) ? $page_data[ $template ]['lcp'] : array();
+		if ( isset( $stored['confidence'] ) ) {
+			return $stored;
+		}
+		$lcp = is_array( $data['lcp'] ?? null ) ? $data['lcp'] : array();
+		if ( ! isset( $lcp['confidence'] ) ) {
+			$lcp['confidence'] = 'img' === ( $lcp['type'] ?? '' ) && ! empty( $lcp['in_viewport'] ) ? 85 : 0;
+		}
+		return $lcp;
 	}
 
 	/**

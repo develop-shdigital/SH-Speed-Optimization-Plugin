@@ -15,11 +15,14 @@
  *   builders  => [ builder id => version ]                           (elementor, elementor_pro, divi, bricks,
  *                                                                      wpbakery, beaver_builder, oxygen, gutenberg …)
  *   features  => [ woocommerce, edd, acf, multilingual (wpml|polylang|translatepress|weglot|null),
- *                  membership[], forms[], booking[], lms[], sliders[], captcha[], maps[], consent[] ]
+ *                  membership[], forms[], booking[], lms[], sliders[], captcha[], maps[], consent[], seo[],
+ *                  ajax_heavy (bool), ajax_plugins[] ]
  *   conflicts => [ slug => [ name, features[] ] ]                     (other optimization systems and the
  *                                                                      features they already provide)
- *   hosting   => [ provider, page_cache (bool), cdn (cloudflare|quic_cloud|bunny|cloudfront|fastly|akamai|
- *                  sucuri|generic|null), server_cache (litespeed|varnish|nginx|generic|null) ]
+ *   hosting   => [ provider, provider_name, page_cache (bool), page_cache_by, cdn (cloudflare|quic_cloud|bunny|
+ *                  cloudfront|fastly|akamai|sucuri|keycdn|stackpath|azure|generic|null), cdn_name,
+ *                  server_cache (litespeed|varnish|nginx|generic|null), server_cache_name, edge_cache_hit (bool) ]
+ *                  (a measured cache hit on a repeated request marks page_cache true)
  *   cache     => [ advanced_cache => [exists, ours, owner], object_cache_dropin => [exists, name],
  *                  wp_cache_constant (bool) ]
  *   loopback  => [ ok (bool), status, ttfb_ms, error, headers[] ]

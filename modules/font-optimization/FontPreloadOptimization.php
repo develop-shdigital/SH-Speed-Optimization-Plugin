@@ -80,9 +80,13 @@ final class FontPreloadOptimization extends AbstractOptimization {
 	 * @param AssessmentContext $context Scan data.
 	 */
 	public function assess( AssessmentContext $context ): Assessment {
+		$page_data = get_option( Runtime::PAGE_DATA_OPTION, array() );
+		$page_data = is_array( $page_data ) ? $page_data : array();
 		$templates = array();
 		foreach ( $context->browser as $template => $data ) {
-			foreach ( (array) ( $data['fonts_preload'] ?? array() ) as $font ) {
+			// Raw browser results carry fonts.preload_candidates; derived page data carries fonts_preload.
+			$candidates = $data['fonts_preload'] ?? ( $data['fonts']['preload_candidates'] ?? ( $page_data[ $template ]['fonts_preload'] ?? array() ) );
+			foreach ( (array) $candidates as $font ) {
 				if ( is_array( $font ) && 'woff2' === ImageUrls::extension( (string) ( $font['url'] ?? '' ) ) ) {
 					$templates[] = (string) $template;
 					break;

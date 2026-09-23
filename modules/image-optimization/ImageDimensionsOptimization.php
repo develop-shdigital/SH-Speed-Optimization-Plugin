@@ -119,6 +119,10 @@ final class ImageDimensionsOptimization extends AbstractOptimization {
 				if ( ! $doc->contains( '<img' ) ) {
 					return;
 				}
+				// One query for all attachment metadata instead of one per image.
+				if ( function_exists( 'update_meta_cache' ) && preg_match_all( '/\bwp-image-(\d+)\b/', $doc->html(), $m ) ) {
+					update_meta_cache( 'post', array_slice( array_values( array_unique( array_map( 'intval', $m[1] ) ) ), 0, 200 ) );
+				}
 				$resolver = DimensionResolver::from_wordpress();
 				$filler   = new DimensionFiller(
 					static function ( string $src, string $srcset, array $classes ) use ( $resolver ) {
