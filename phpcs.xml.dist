@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<ruleset name="SH Speed Optimizer">
+    <description>WordPress Coding Standards with PSR-4 file names and short arrays disallowed.</description>
+    <file>sh-speed-optimizer.php</file>
+    <file>uninstall.php</file>
+    <file>includes</file>
+    <file>modules</file>
+    <file>templates</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+    <arg name="parallel" value="8"/>
+
+    <config name="minimum_supported_wp_version" value="6.2"/>
+    <config name="testVersion" value="8.1-"/>
+
+    <rule ref="WordPress-Extra">
+        <!-- PSR-4 class files (Foo.php) instead of class-foo.php. -->
+        <exclude name="WordPress.Files.FileName"/>
+        <!-- Typed properties are documented by their type. -->
+        <exclude name="Squiz.Commenting.VariableComment.MissingVar"/>
+    </rule>
+    <rule ref="WordPress-Docs">
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
+    </rule>
+    <rule ref="PHPCompatibilityWP"/>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="sh-speed-optimizer"/>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="shso"/>
+                <element value="SHSO"/>
+                <element value="SH\SpeedOptimizer"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
