@@ -61,9 +61,17 @@ test.describe( 'Cache invalidation', () => {
 
 	test( 'manual purge from the toolbar endpoint and REST', async ( { request } ) => {
 		const u = urls();
-		await shso.fetchPage( request, u.home );
-		expect( ( await shso.fetchPage( request, u.home ) ).cache ).toBe( 'HIT' );
-		shso.purge();
-		expect( ( await shso.fetchPage( request, u.home ) ).cache ).not.toBe( 'HIT' );
+		// The preloader re-warms purged pages in the background (earlier tests queued it).
+		// Pause it and let a running batch finish, so the purge itself is observed.
+		shso.setSettings( { preload: false } );
+		try {
+			await expect.poll( () => shso.evalJson( `(bool) get_transient( 'shso_preload_lock' )` ), { timeout: 150 * 1000 } ).toBe( false );
+			await shso.fetchPage( request, u.home );
+			expect( ( await shso.fetchPage( request, u.home ) ).cache ).toBe( 'HIT' );
+			shso.purge();
+			expect( ( await shso.fetchPage( request, u.home ) ).cache ).not.toBe( 'HIT' );
+		} finally {
+			shso.setSettings( { preload: true } );
+		}
 	} );
 } );
