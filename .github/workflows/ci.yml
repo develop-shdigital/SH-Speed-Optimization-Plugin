@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '8.1', '8.2', '8.3', '8.4' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, curl, gd, posix
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      - name: Lint PHP files
+        run: composer lint
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
+
+  phpcs:
+    name: PHPCS (WordPress Coding Standards)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: cs2pr
+          coverage: none
+
+      - uses: ramsey/composer-install@v3
+
+      # Warnings are reported as annotations but only errors fail the job.
+      - name: Run PHPCS
+        run: vendor/bin/phpcs -q --report-full --report-checkstyle=./phpcs-report.xml --runtime-set ignore_warnings_on_exit 1
+
+      - name: Annotate pull request
+        if: ${{ always() && hashFiles('phpcs-report.xml') != '' }}
+        run: cs2pr ./phpcs-report.xml --graceful-warnings

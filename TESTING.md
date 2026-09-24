@@ -93,3 +93,13 @@ composer lint        # php -l on all files
 vendor/bin/phpcs     # WordPress Coding Standards (see phpcs.xml.dist)
 node --check assets/js/*.js
 ```
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every pull request and on pushes to `main`:
+
+* **PHPUnit** on PHP 8.1, 8.2, 8.3 and 8.4 (after `composer lint`).
+* **PHPCS** with the WordPress Coding Standards. Errors fail the job; warnings
+  are shown as annotations on the pull request.
+
+The E2E suite needs a full WordPress site and is run locally (see above).
