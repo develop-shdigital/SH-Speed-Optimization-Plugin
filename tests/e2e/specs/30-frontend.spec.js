@@ -137,7 +137,11 @@ test.describe( 'Frontend with optimizations active', () => {
 		const overlay = phone.locator( '.wp-block-navigation__responsive-container.is-menu-open' ).first();
 		await expect( overlay ).toBeVisible();
 		await expect( overlay.locator( `a[href="${ u.shop }"]` ).first() ).toBeVisible();
-		await phone.locator( 'button.wp-block-navigation__responsive-container-close' ).first().click();
+		// Close with Escape: the demo content (a 600px video) makes the page wider than the
+		// phone, which leaves the close button off-screen behind the fixed menu panel. That
+		// happens without SH Speed Optimizer too, so clicking it would test the theme.
+		await expect( phone.locator( 'button.wp-block-navigation__responsive-container-close' ).first() ).toBeAttached();
+		await phone.keyboard.press( 'Escape' );
 		await expect( overlay ).toBeHidden();
 		expect( phoneErrors ).toEqual( [] );
 		await mobile.close();
