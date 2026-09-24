@@ -90,6 +90,9 @@ abstract class AbstractOptimization implements OptimizationInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param array $baseline  Baseline snapshot.
+	 * @param array $candidate Candidate snapshot.
 	 */
 	public function verify( array $baseline, array $candidate ): ?string {
 		return null;

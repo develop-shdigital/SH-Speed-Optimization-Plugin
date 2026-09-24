@@ -6,11 +6,11 @@
  * delivery). It is only written when the slot is free or already ours: a
  * drop-in of another cache plugin is never touched. wp-config.php is never
  * edited automatically; enable_wp_cache_constant() is an explicit
- * administrator action with backup, syntax check and automatic restore.
+ * administrator action with a syntax check and automatic restore from the
+ * in-memory original. No copy of wp-config.php (credentials) is ever written.
  *
  * These are the only two files outside the plugin's own directories this
- * class writes (Core\Filesystem refuses PHP files by design); backups of
- * wp-config.php go through Core\Filesystem into the private cache directory.
+ * class writes (Core\Filesystem refuses PHP files by design).
  *
  * @package SH\SpeedOptimizer
  */
@@ -46,7 +46,7 @@ final class Dropin {
 	public const WP_CACHE_MARKER = 'Added by SH Speed Optimizer (page cache)';
 
 	/**
-	 * Option holding the path of the latest wp-config.php backup (not autoloaded).
+	 * Option holding a fingerprint of wp-config.php before the last change (not autoloaded).
 	 */
 	public const BACKUP_OPTION = 'shso_wp_config_backup';
 
@@ -440,7 +440,7 @@ PHP;
 	/**
 	 * Record a wp-config.php change.
 	 *
-	 * wp-config.php contains database credentials and salts, so no copy of it
+	 * The file wp-config.php contains database credentials and salts, so no copy of it
 	 * is ever written anywhere (a file below wp-content could be reachable on
 	 * servers that ignore .htaccess). The automatic restore uses the original
 	 * contents held in memory, and the change itself is a single marked line

@@ -77,6 +77,8 @@ final class Scanner implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param array $args Job arguments.
 	 */
 	public function steps( array $args ): array {
 		return self::scan_steps( ! empty( $args['browser'] ) );
@@ -84,6 +86,8 @@ final class Scanner implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $step Step id.
 	 */
 	public function label( string $step ): string {
 		$labels = array(
@@ -102,6 +106,9 @@ final class Scanner implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $step Step id.
+	 * @param Job    $job  Job.
 	 */
 	public function run_step( string $step, Job $job ): StepResult {
 		switch ( $step ) {
@@ -159,6 +166,8 @@ final class Scanner implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Job $job Job.
 	 */
 	public function complete( Job $job ): void {
 		$summary = $job->get( 'summary', array() );
@@ -174,6 +183,9 @@ final class Scanner implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Job    $job    Job.
+	 * @param string $reason Reason.
 	 */
 	public function abort( Job $job, string $reason ): void {
 		// A scan changes nothing on the site; nothing to undo.

@@ -87,7 +87,7 @@ final class Signer {
 	/**
 	 * Salt from wp-config.php constants.
 	 *
-	 * wp_salt() is a pluggable function that does not exist yet when tokens are
+	 * The pluggable wp_salt() does not exist yet when tokens are
 	 * verified (during plugin loading), so the constants are read directly.
 	 * The random per-site secret alone already makes tokens unforgeable; the
 	 * salt only adds protection if the database leaks.

@@ -191,7 +191,7 @@ final class HtmlPipeline {
 	 * @param string $html Markup.
 	 */
 	private function is_transformable( string $html ): bool {
-		if ( strlen( $html ) < 255 || http_response_code() >= 300 && http_response_code() !== 404 ) {
+		if ( strlen( $html ) < 255 || ( http_response_code() >= 300 && 404 !== http_response_code() ) ) {
 			return false;
 		}
 

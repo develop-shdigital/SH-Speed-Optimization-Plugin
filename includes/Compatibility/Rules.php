@@ -26,19 +26,19 @@ final class Rules {
 	 * @var array<string,array<int|string,mixed>>
 	 */
 	private array $lists = array(
-		'js_no_defer'        => array(), // Handles/URL fragments that must never be deferred.
-		'js_no_delay'        => array(), // Handles/URL fragments/inline code fragments never delayed.
-		'js_no_minify'       => array(),
-		'css_no_optimize'    => array(), // Never minified or loaded asynchronously.
-		'lazy_exclude'       => array(), // Image/iframe class, id or URL fragments never lazy loaded.
-		'cache_exclude_urls' => array(), // URL patterns (see Context::url_matches()) never cached.
+		'js_no_defer'           => array(), // Handles/URL fragments that must never be deferred.
+		'js_no_delay'           => array(), // Handles/URL fragments/inline code fragments never delayed.
+		'js_no_minify'          => array(),
+		'css_no_optimize'       => array(), // Never minified or loaded asynchronously.
+		'lazy_exclude'          => array(), // Image/iframe class, id or URL fragments never lazy loaded.
+		'cache_exclude_urls'    => array(), // URL patterns (see Context::url_matches()) never cached.
 		'cache_exclude_cookies' => array(), // Cookie name prefixes that bypass the page cache.
-		'cache_vary_cookies' => array(), // Cookie names whose values produce separate cache variants.
-		'cache_safe_cookies' => array(), // Cookies a response may set without making it uncacheable.
-		'cache_query_keep'   => array(), // Query parameters that change content (cached as variants).
-		'cache_query_ignore' => array(), // Tracking parameters stripped from the cache key.
-		'inline_globals'     => array(), // handle => JS globals that handle defines.
-		'facade_exclude'     => array(), // URL/markup fragments never replaced by facades.
+		'cache_vary_cookies'    => array(), // Cookie names whose values produce separate cache variants.
+		'cache_safe_cookies'    => array(), // Cookies a response may set without making it uncacheable.
+		'cache_query_keep'      => array(), // Query parameters that change content (cached as variants).
+		'cache_query_ignore'    => array(), // Tracking parameters stripped from the cache key.
+		'inline_globals'        => array(), // handle => JS globals that handle defines.
+		'facade_exclude'        => array(), // URL/markup fragments never replaced by facades.
 	);
 
 	/**
@@ -101,7 +101,7 @@ final class Rules {
 	 * Whether any entry of a list matches one of the haystacks (case-insensitive substring).
 	 *
 	 * @param string   $list       List key.
-	 * @param string[] $haystacks  Handle, URL, code …
+	 * @param string[] $haystacks  Handle, URL, code and similar.
 	 */
 	public function matches( string $list, array $haystacks ): bool {
 		foreach ( $this->get( $list ) as $needle ) {

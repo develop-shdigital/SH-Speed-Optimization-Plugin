@@ -66,6 +66,8 @@ final class Engine implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param array $args Job arguments.
 	 */
 	public function steps( array $args ): array {
 		if ( ! empty( $args['health'] ) ) {
@@ -79,6 +81,8 @@ final class Engine implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $step Step id.
 	 */
 	public function label( string $step ): string {
 		if ( str_starts_with( $step, 'scan:' ) ) {
@@ -126,6 +130,9 @@ final class Engine implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $step Step id.
+	 * @param Job    $job  Job.
 	 */
 	public function run_step( string $step, Job $job ): StepResult {
 		if ( str_starts_with( $step, 'scan:' ) ) {
@@ -179,6 +186,8 @@ final class Engine implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Job $job Job.
 	 */
 	public function complete( Job $job ): void {
 		if ( $job->arg( 'health' ) ) {
@@ -197,6 +206,9 @@ final class Engine implements JobHandlerInterface {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param Job    $job    Job.
+	 * @param string $reason Reason.
 	 */
 	public function abort( Job $job, string $reason ): void {
 		$snapshot = (int) $job->get( 'snapshot', 0 );

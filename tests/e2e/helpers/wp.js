@@ -25,9 +25,14 @@ const ADMIN_PASSWORD = 'admin';
  * @param {import('@playwright/test').Page} page
  */
 async function login( page ) {
-	await page.goto( '/wp-login.php', { waitUntil: 'domcontentloaded' } );
-	await page.locator( '#user_login' ).fill( ADMIN_USER );
-	await page.locator( '#user_pass' ).fill( ADMIN_PASSWORD );
+	// Wait for 'load': wp-login.php's scripts can reset fields filled earlier.
+	await page.goto( '/wp-login.php', { waitUntil: 'load' } );
+	await expect( async () => {
+		await page.locator( '#user_login' ).fill( ADMIN_USER );
+		await page.locator( '#user_pass' ).fill( ADMIN_PASSWORD );
+		await expect( page.locator( '#user_login' ) ).toHaveValue( ADMIN_USER, { timeout: 1000 } );
+		await expect( page.locator( '#user_pass' ) ).toHaveValue( ADMIN_PASSWORD, { timeout: 1000 } );
+	} ).toPass( { timeout: 15000 } );
 	await Promise.all( [
 		page.waitForURL( /\/wp-admin\/|action=confirm_admin_email/, { waitUntil: 'domcontentloaded' } ),
 		page.locator( '#wp-submit' ).click(),
@@ -75,13 +80,47 @@ function wpCli( args, options = {} ) {
 			env: { ...process.env, WP_CLI_ALLOW_ROOT: '1' },
 			stdio: [ 'pipe', 'pipe', 'pipe' ],
 		} );
-		return out.trim();
+		return stripLoggerOutput( out ).trim();
 	} catch ( error ) {
 		const e = /** @type {any} */ ( error );
 		const stderr = e.stderr ? String( e.stderr ).trim() : '';
 		const stdout = e.stdout ? String( e.stdout ).trim() : '';
 		throw new Error( `wp ${ argv.join( ' ' ) } failed (exit ${ e.status }):\n${ stderr || stdout || e.message }` );
 	}
+}
+
+/**
+ * Remove PHP notices that plugin loggers print to stdout under WP-CLI.
+ *
+ * Elementor's logger writes entries such as
+ * `PHP: 2026-01-01 00:00:00 [notice X 0][file::1] message [array (` ... `)]`
+ * to stdout on shutdown, which would corrupt command output.
+ *
+ * @param {string} out
+ * @returns {string}
+ */
+function stripLoggerOutput( out ) {
+	const lines = out.split( '\n' );
+	const kept = [];
+	const entry = /PHP: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[/;
+	for ( let i = 0; i < lines.length; i++ ) {
+		const match = entry.exec( lines[ i ] );
+		if ( ! match ) {
+			kept.push( lines[ i ] );
+			continue;
+		}
+		// The entry may follow output that did not end with a newline.
+		if ( match.index > 0 ) {
+			kept.push( lines[ i ].slice( 0, match.index ) );
+		}
+		// Multi-line entry with a context dump: skip through its closing ")]".
+		if ( /\[array \($/.test( lines[ i ] ) ) {
+			while ( i < lines.length - 1 && lines[ i ].trim() !== ')]' ) {
+				i++;
+			}
+		}
+	}
+	return kept.join( '\n' );
 }
 
 /**

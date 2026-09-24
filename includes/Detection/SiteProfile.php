@@ -98,7 +98,7 @@ final class SiteProfile {
 	 * @param array<string,mixed> $values  Values.
 	 */
 	public function merge( string $section, array $values ): void {
-		$current                  = isset( $this->data[ $section ] ) && is_array( $this->data[ $section ] ) ? $this->data[ $section ] : array();
+		$current                = isset( $this->data[ $section ] ) && is_array( $this->data[ $section ] ) ? $this->data[ $section ] : array();
 		$this->data[ $section ] = array_merge( $current, $values );
 	}
 

@@ -320,13 +320,18 @@ decisions and the debug log, and can download everything as JSON.
 | `shso_optimization_rollback` | `$id, $reason, $code` | After a rollback |
 | `shso_cache_cleared` | `$scope, $urls` | Page cache purged (`all`, `url`, `post`, `term`) |
 | `shso_cache_generated` | `$url, $file` | A page was stored in the cache |
-| `shso_asset_excluded` | `$handle_or_url, $optimization_id, $reason` | An asset was skipped because of an exclusion |
+| `shso_asset_excluded` | `$asset, $rule_list, $source` | An asset was left untouched because of an exclusion (`compatibility` profile or `user` setting) |
 | `shso_url_excluded` | `$url, $reason` | A URL was excluded from caching |
 | `shso_settings_updated` | `$current, $previous` | Settings changed |
 | `shso_configuration_changed` | `$reason` | Optimizations/settings changed (cache purged) |
 | `shso_snapshot_restored` | `$id, $snapshot` | A restore point was restored |
 | `shso_register_job_handlers` | `$jobs, $plugin` | Register custom background job types |
 | `shso_purge_all` | — | Fire to purge the page cache |
+| `shso_db_cleaned` | `$summary` | A database cleanup finished (rows per item, backup id) |
+| `shso_db_restored` | `$result, $backup_id` | A database backup was restored |
+| `shso_critical_css_stored` | `$template, $entry` | Critical CSS was generated for a template |
+| `shso_asset_copy_generated` | `$path, $source, $ids` | An optimized CSS/JS copy was written |
+| `shso_local_fonts_updated` | — | Locally hosted Google Fonts changed |
 
 ### Filters
 
@@ -347,6 +352,25 @@ decisions and the debug log, and can download everything as JSON.
 | `shso_loopback_use_curl` | Use cURL (default) or the WordPress HTTP API for loopbacks |
 | `shso_rum_sample_rate` | Share of page views measured (default 0.1) |
 | `shso_rum_daily_cap` | Max stored real-user beacons per day |
+| `shso_cache_excluded_urls` | URL patterns never cached |
+| `shso_cache_bypass_cookies` | Cookie prefixes that bypass the page cache |
+| `shso_cache_ignored_query_params` | Tracking parameters stripped from the cache key |
+| `shso_cache_lifespan` | Cache lifespan in seconds (`$seconds, $url`) |
+| `shso_cache_should_store` | Whether a page may be stored (`$store, $url`) |
+| `shso_cache_post_urls` | URLs purged when a post changes (`$urls, $post`) |
+| `shso_cache_mobile_variant` | Whether to keep a separate mobile cache |
+| `shso_preload_urls` | URLs the cache preloader visits |
+| `shso_db_clean_excluded_post_types` | Post types database cleanup never touches |
+| `shso_db_option_source_map` | Option prefix → plugin/theme name for the options report |
+| `shso_db_backup_retention_days` | Days database backups are kept (default 30) |
+| `shso_compatibility_profiles` | Add/remove compatibility profiles |
+| `shso_site_profile_quick` / `shso_site_profile` | Adjust the detected site profile |
+| `shso_webp_quality` | WebP/AVIF quality (`$quality, $format, $source`) |
+| `shso_avif_delivery` | Serve AVIF when available (default false) |
+| `shso_webp_max_bytes` | Disk budget for converted images |
+| `shso_prefetch_excluded_paths` | Paths never prefetched (cart, checkout, …) |
+| `shso_delay_timeout` | Seconds before delayed third-party scripts load anyway (default 8) |
+| `shso_delay_all_timeout` | Fallback timeout for all delayed scripts (default 0 = interaction only) |
 
 Module-specific hooks are listed in the class docblocks next to each
 `do_action()` / `apply_filters()` call.

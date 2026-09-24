@@ -39,15 +39,30 @@ final class Exclusions {
 			if ( empty( $haystacks ) ) {
 				return false;
 			}
+			$source = null;
 			if ( $rules->matches( $rule_list, $haystacks ) ) {
-				return true;
-			}
-			foreach ( $haystacks as $haystack ) {
-				if ( Context::url_matches( $patterns, $haystack ) ) {
-					return true;
+				$source = 'compatibility';
+			} else {
+				foreach ( $haystacks as $haystack ) {
+					if ( Context::url_matches( $patterns, $haystack ) ) {
+						$source = 'user';
+						break;
+					}
 				}
 			}
-			return false;
+			if ( null === $source ) {
+				return false;
+			}
+
+			/**
+			 * Fires when a script or stylesheet is left untouched because of an exclusion.
+			 *
+			 * @param string $asset     Handle, or URL when there is no handle (inline code: '').
+			 * @param string $rule_list Rule list that matched, e.g. "js_no_defer", "css_no_optimize".
+			 * @param string $source    "compatibility" (a compatibility profile) or "user" (Settings → Exclusions).
+			 */
+			do_action( 'shso_asset_excluded', '' !== $handle ? $handle : $url, $rule_list, $source );
+			return true;
 		};
 	}
 

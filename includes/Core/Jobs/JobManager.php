@@ -120,9 +120,10 @@ final class JobManager {
 	}
 
 	/**
-	 * Run steps for up to $budget seconds.
+	 * Run steps for up to $budget seconds. Step failures are caught and abort the job safely.
 	 *
 	 * @param float $budget Seconds.
+	 * @throws \RuntimeException Never escapes: caught internally when a handler is missing.
 	 */
 	public function run( float $budget = 8.0 ): ?Job {
 		$job = $this->current();

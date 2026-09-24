@@ -188,7 +188,8 @@ final class Tag {
 	 * @return string[]
 	 */
 	public function classes(): array {
-		return array_values( array_filter( preg_split( '/\s+/', (string) $this->get( 'class' ) ) ?: array() ) );
+		$parts = preg_split( '/\s+/', (string) $this->get( 'class' ) );
+		return array_values( array_filter( is_array( $parts ) ? $parts : array() ) );
 	}
 
 	/**
