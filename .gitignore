@@ -1,0 +1,10 @@
+/vendor/
+/.phpunit.cache/
+/.phpunit.result.cache
+/tests/e2e/node_modules/
+/tests/e2e/test-results/
+/tests/e2e/playwright-report/
+.DS_Store
+*.log
+/build/
+/phpcs-report.xml
