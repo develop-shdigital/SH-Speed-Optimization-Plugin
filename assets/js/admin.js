@@ -3178,10 +3178,12 @@
 		fieldNode( field ) {
 			const id = 'shso-setting-' + field.key;
 			const helpId = id + '-help';
-			const locked = this.isLocked( field.key );
+			// Server files may be off-limits (DISALLOW_FILE_MODS, or a site administrator on multisite).
+			const blocked = 'allow_server_config' === field.key && ! this.settings.allow_server_config ? String( this.meta.server_files || '' ) : '';
+			const locked = this.isLocked( field.key ) || '' !== blocked;
 			const describedBy = [ field.help || field.warning ? helpId : null, locked ? id + '-locked' : null ].filter( Boolean ).join( ' ' ) || null;
 			const help = field.help ? h( 'p', { class: 'shso-field__help', id: helpId }, field.help ) : field.warning ? h( 'p', { class: 'shso-field__warning', id: helpId }, field.warning ) : null;
-			const lockNote = locked ? h( 'p', { class: 'shso-field__locked', id: id + '-locked' }, __( 'Set by your network administrator', 'sh-speed-optimizer' ) ) : null;
+			const lockNote = locked ? h( 'p', { class: 'shso-field__locked', id: id + '-locked' }, blocked || __( 'Set by your network administrator', 'sh-speed-optimizer' ) ) : null;
 			let control;
 
 			switch ( field.type ) {

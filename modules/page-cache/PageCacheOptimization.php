@@ -27,6 +27,7 @@ use SH\SpeedOptimizer\Optimization\AssessmentContext;
 use SH\SpeedOptimizer\Optimization\Category;
 use SH\SpeedOptimizer\Optimization\Risk;
 use SH\SpeedOptimizer\Optimization\Runtime;
+use SH\SpeedOptimizer\Security\Capabilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -222,7 +223,11 @@ final class PageCacheOptimization extends AbstractOptimization {
 			return new \WP_Error( 'shso_cache_config', __( 'The page cache could not save its settings file. Please check that the wp-content/cache folder is writable.', 'sh-speed-optimizer' ) );
 		}
 
-		if ( Dropin::wp_cache_enabled() && ! $foreign ) {
+		// On multisite the drop-in serves every site: added automatically only once a
+		// network administrator installed it (then it is just kept current).
+		$may_install = null === Capabilities::server_files_blocked_reason( false )
+			&& ( ! is_multisite() || Dropin::OWNER_SELF === $owner || current_user_can( 'manage_network_options' ) );
+		if ( Dropin::wp_cache_enabled() && ! $foreign && $may_install ) {
 			$installed = Dropin::install();
 			if ( is_wp_error( $installed ) ) {
 				// Not fatal: pages are served by the plugin itself (fallback mode).
@@ -377,7 +382,7 @@ final class PageCacheOptimization extends AbstractOptimization {
 		foreach ( array( 'activated_plugin', 'deactivated_plugin', 'switch_theme', 'update_option_permalink_structure', 'update_option_home', 'update_option_siteurl', 'update_option_woocommerce_default_customer_address', 'update_option_woocommerce_permalinks' ) as $hook ) {
 			add_action( $hook, array( $cache, 'schedule_config_write' ) );
 		}
-		add_action( 'wp_delete_site', array( $cache, 'forget_site' ) );
+		// Deleted/suspended sites are handled network-wide in Plugin::boot().
 
 		// Delivery (fallback mode serves here and exits on a hit) and capture.
 		$decision = $cache->deliver();

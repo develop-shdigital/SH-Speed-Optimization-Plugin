@@ -93,13 +93,57 @@ final class Loopback {
 			(array) $args['headers']
 		);
 
-		$result['url'] = $url;
+		$result['url']  = $url;
+		$use_curl       = function_exists( 'curl_init' ) && apply_filters( 'shso_loopback_use_curl', true );
+		$follow         = (bool) $args['follow'];
+		$args['follow'] = false; // Redirects are followed here, so every hop is checked.
 
-		if ( function_exists( 'curl_init' ) && apply_filters( 'shso_loopback_use_curl', true ) ) {
-			return self::curl( $url, $args, $headers, $result );
+		for ( $hop = 0; ; $hop++ ) {
+			$response = $use_curl ? self::curl( $url, $args, $headers, $result ) : self::wp_http( $url, $args, $headers, $result );
+			$location = (string) ( $response['headers']['location'] ?? '' );
+			if ( ! $follow || $hop >= 3 || $response['status'] < 300 || $response['status'] > 399 || '' === $location ) {
+				return $response;
+			}
+			$next = self::resolve_redirect( $url, $location );
+			if ( null === $next || ! self::is_own_url( $next ) ) {
+				return $response; // Never follow a redirect away from this site.
+			}
+			$url           = $next;
+			$result['url'] = $url;
+			if ( 303 === $response['status'] ) {
+				$args['method'] = 'GET';
+			}
+		}
+	}
+
+	/**
+	 * Absolute URL of a redirect target (http/https only), or null.
+	 *
+	 * @param string $base     URL that was requested.
+	 * @param string $location Location header.
+	 */
+	public static function resolve_redirect( string $base, string $location ): ?string {
+		$location = trim( $location );
+		if ( '' === $location || preg_match( '/[\x00-\x1F\x7F]/', $location ) ) {
+			return null;
+		}
+		$parts = wp_parse_url( $base );
+		if ( ! is_array( $parts ) || empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return null;
+		}
+		$origin = $parts['scheme'] . '://' . $parts['host'] . ( isset( $parts['port'] ) ? ':' . $parts['port'] : '' );
+
+		if ( 0 === strpos( $location, '//' ) ) {
+			$location = $parts['scheme'] . ':' . $location;
+		} elseif ( 0 === strpos( $location, '/' ) ) {
+			$location = $origin . $location;
+		} elseif ( ! preg_match( '#^[a-z][a-z0-9+.\-]*:#i', $location ) ) {
+			$dir      = isset( $parts['path'] ) ? preg_replace( '#/[^/]*$#', '/', $parts['path'] ) : '/';
+			$location = $origin . $dir . $location;
 		}
 
-		return self::wp_http( $url, $args, $headers, $result );
+		$scheme = strtolower( (string) wp_parse_url( $location, PHP_URL_SCHEME ) );
+		return in_array( $scheme, array( 'http', 'https' ), true ) ? $location : null;
 	}
 
 	/**
@@ -112,7 +156,8 @@ final class Loopback {
 	}
 
 	/**
-	 * Whether a URL belongs to this site (same host as home or site URL).
+	 * Whether a URL belongs to this site (same host as home or site URL; on
+	 * multisite also a path of this site, not of another site on the same host).
 	 *
 	 * @param string $url URL.
 	 */
@@ -125,7 +170,15 @@ final class Loopback {
 			strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ),
 			strtolower( (string) wp_parse_url( site_url(), PHP_URL_HOST ) ),
 		);
-		return in_array( $host, $hosts, true );
+		if ( ! in_array( $host, $hosts, true ) ) {
+			return false;
+		}
+		if ( is_multisite() && function_exists( 'get_site_by_path' ) ) {
+			$path  = (string) wp_parse_url( $url, PHP_URL_PATH );
+			$owner = get_site_by_path( $host, '' === $path ? '/' : $path );
+			return is_object( $owner ) && (int) get_current_blog_id() === (int) $owner->blog_id;
+		}
+		return true;
 	}
 
 	/**
@@ -162,8 +215,8 @@ final class Loopback {
 				CURLOPT_URL            => $url,
 				CURLOPT_RETURNTRANSFER => false,
 				CURLOPT_NOBODY         => 'HEAD' === $args['method'],
-				CURLOPT_FOLLOWLOCATION => (bool) $args['follow'],
-				CURLOPT_MAXREDIRS      => 3,
+				CURLOPT_FOLLOWLOCATION => false, // Followed by get() after checking the target.
+				CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
 				CURLOPT_TIMEOUT        => (int) $args['timeout'],
 				CURLOPT_CONNECTTIMEOUT => 10,
 				CURLOPT_USERAGENT      => self::USER_AGENT,
@@ -236,7 +289,8 @@ final class Loopback {
 			array(
 				'method'              => $args['method'],
 				'timeout'             => (int) $args['timeout'],
-				'redirection'         => $args['follow'] ? 3 : 0,
+				'redirection'         => 0, // Followed by get() after checking the target.
+				'reject_unsafe_urls'  => true,
 				'user-agent'          => self::USER_AGENT,
 				'headers'             => $headers,
 				'cookies'             => $cookies,

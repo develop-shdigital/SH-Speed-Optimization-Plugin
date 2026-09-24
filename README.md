@@ -211,13 +211,20 @@ weights, render-blocking resources, third-party scripts, server configuration.
   moderate 70), benefit must be real, high-risk and experimental never
   automatic, permissions required for server configuration and external downloads.
 * **Signed verification requests** — `?shso_verify=<token>` (HMAC-SHA256 with a
-  per-site secret, 15–30 minute lifetime) renders a page as an anonymous visitor
+  per-site secret, 15 minute lifetime) renders a page as an anonymous visitor
   with exactly the requested optimizations, bypassing every cache. Visitors
   cannot use it.
 * **Server verification** — see *How it works*.
 * **Browser verification** — the dashboard loads baseline and optimized pages in
   sandboxed same-origin frames (no top navigation, no popups) and a probe
-  reports errors and layout metrics.
+  reports errors and layout metrics. Same-origin access is needed to generate
+  critical CSS, so scripts on the tested pages (including third-party scripts
+  a site may hide from logged-in users) run next to the dashboard while the
+  checks run. Only run browser checks when you trust the scripts on your site.
+* **Server files** — `wp-config.php`, `advanced-cache.php` and `.htaccess` are
+  only changed with explicit permission, never when `DISALLOW_FILE_MODS` is set
+  and, on multisite, only at a network administrator's request.
+  `wp-config.php` is validated and then replaced atomically.
 * **Isolation of failures** — failing groups are split and retried.
 * **Per-page exclusions** — optimizations can be excluded for a single template
   or URL instead of globally.

@@ -9,20 +9,37 @@
 ( function () {
 	'use strict';
 
-	// Only these hosts may be loaded (the URLs were written by the server, this is defense in depth).
-	var ALLOWED_HOST = /(^|\.)(youtube\.com|youtube-nocookie\.com|vimeo\.com|google\.[a-z]{2,3}(\.[a-z]{2})?)$/i;
-	var SAFE_NAME = /^[a-z][a-z0-9_.:\-]*$/i;
+	// Only these embeds may be loaded. Facade markup could also come from post content
+	// (class and data-* attributes pass the HTML filter), so everything is checked again here.
+	var VIDEO_HOST = /^(www\.|m\.)?(youtube\.com|youtube-nocookie\.com)$|^player\.vimeo\.com$/i;
+	var MAP_HOST = /^((www|maps)\.)?google\.[a-z]{2,3}(\.[a-z]{2})?$/i;
+	// Iframe attributes that may be restored; everything else is dropped.
+	var ALLOWED_ATTRIBUTES = [ 'title', 'width', 'height', 'allow', 'allowfullscreen', 'referrerpolicy', 'frameborder', 'sandbox', 'style', 'class', 'id', 'name', 'aria-label', 'aria-hidden' ];
+	var DATA_ATTRIBUTE = /^data-[a-z0-9_.\-]+$/;
+	var ALLOWED_FEATURES = [ 'accelerometer', 'autoplay', 'clipboard-write', 'encrypted-media', 'fullscreen', 'gyroscope', 'picture-in-picture', 'web-share' ];
 
 	function safeSrc( src ) {
 		try {
 			var url = new URL( src, window.location.href );
-			if ( 'https:' !== url.protocol || ! ALLOWED_HOST.test( url.hostname ) ) {
+			if ( 'https:' !== url.protocol ) {
 				return '';
 			}
-			return url.href;
+			if ( VIDEO_HOST.test( url.hostname ) || ( MAP_HOST.test( url.hostname ) && 0 === url.pathname.indexOf( '/maps' ) ) ) {
+				return url.href;
+			}
+			return '';
 		} catch ( e ) {
 			return '';
 		}
+	}
+
+	// Keep only harmless permissions in an allow attribute ("autoplay; fullscreen").
+	function safeAllow( value ) {
+		return String( value ).split( ';' ).map( function ( part ) {
+			return part.trim();
+		} ).filter( function ( part ) {
+			return -1 !== ALLOWED_FEATURES.indexOf( part.split( /\s+/ )[ 0 ].toLowerCase() );
+		} ).join( '; ' );
 	}
 
 	function readAttributes( facade ) {
@@ -50,14 +67,11 @@
 
 			Object.keys( attributes ).forEach( function ( name ) {
 				var lower = String( name ).toLowerCase();
-				if ( ! SAFE_NAME.test( name ) || 'src' === lower || 'srcdoc' === lower || 0 === lower.indexOf( 'on' ) ) {
+				if ( -1 === ALLOWED_ATTRIBUTES.indexOf( lower ) && ! DATA_ATTRIBUTE.test( lower ) ) {
 					return;
 				}
-				try {
-					iframe.setAttribute( name, null === attributes[ name ] ? '' : String( attributes[ name ] ) );
-				} catch ( e ) {
-					// Invalid attribute name: skip it.
-				}
+				var value = null === attributes[ name ] ? '' : String( attributes[ name ] );
+				iframe.setAttribute( lower, 'allow' === lower ? safeAllow( value ) : value );
 			} );
 
 			if ( 'google-maps' !== facade.getAttribute( 'data-shso-provider' ) ) {

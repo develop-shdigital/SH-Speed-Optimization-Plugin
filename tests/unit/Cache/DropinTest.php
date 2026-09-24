@@ -148,10 +148,14 @@ final class DropinTest extends TestCase {
 			$this->markTestSkipped( 'A wp-config.php already exists in the test ABSPATH.' );
 		}
 		file_put_contents( $path, self::WP_CONFIG );
+		chmod( $path, 0640 );
 		$this->created_config = true;
 
 		$this->assertSame( $path, Dropin::wp_config_path() );
 		$this->assertTrue( Dropin::enable_wp_cache_constant() );
+		clearstatcache();
+		$this->assertSame( 0640, fileperms( $path ) & 0777, 'Permissions of wp-config.php are kept.' );
+		$this->assertSame( array(), glob( ABSPATH . 'wp-config-shso-*.php' ), 'No temporary file is left behind.' );
 
 		$contents = (string) file_get_contents( $path );
 		$this->assertStringContainsString( "define( 'WP_CACHE', true ); // " . Dropin::WP_CACHE_MARKER, $contents );

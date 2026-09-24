@@ -52,3 +52,29 @@ First release.
   many more — overlapping features are skipped, nothing is deactivated.
 * Minimal admin: Overview, Optimization, Diagnostics, Cache, Settings; network
   defaults on multisite; WP-CLI commands (`wp shso`).
+
+### Security
+
+Hardening from the pre-release security audit:
+
+* Pages requested with tracking parameters (`utm_*`, `fbclid`, …) are served
+  from the cache but never stored, so a crafted parameter can no longer end up
+  in the cached copy served to every visitor.
+* `wp-config.php`, `advanced-cache.php` and `.htaccess` are never changed when
+  `DISALLOW_FILE_MODS` is set and, on multisite, only at a network
+  administrator's request. `wp-config.php` is validated first and replaced atomically.
+* Loopback requests follow redirects only to this site, over HTTP(S), one hop
+  at a time.
+* Real-user monitoring checks its daily cap before writing anything and limits
+  IPv6 clients per /64 network.
+* Deleted, archived, spam and deactivated network sites stop being served from
+  the cache immediately; their cache is restored when the site is reactivated.
+* Click-to-load facades only load YouTube, Vimeo and Google Maps embeds and
+  restore an allowlist of iframe attributes and permissions.
+* The `shso_cache_dir` filter refuses wp-content itself and shared directories.
+* On subdirectory networks, "clear this URL" only accepts the site's own pages.
+* Browser verification tokens expire after 15 minutes; `PHPSESSID` bypasses the page cache.
+
+### Fixed
+
+* Critical CSS generated in the browser was truncated before being stored.

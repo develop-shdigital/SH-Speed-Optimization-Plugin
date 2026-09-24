@@ -63,19 +63,11 @@ final class Rum {
 
 	/**
 	 * Rate limit check for an incoming beacon.
+	 *
+	 * The daily cap is checked before anything is written, so rejected beacons
+	 * never add rows; IPv6 addresses are limited per /64 network.
 	 */
 	public static function allow(): bool {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$ip   = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
-		$hash = substr( hash( 'sha256', $ip . '|' . gmdate( 'YmdH' ) . '|' . wp_salt( 'nonce' ) ), 0, 16 );
-		$key  = 'shso_rum_' . $hash;
-
-		$count = (int) get_transient( $key );
-		if ( $count >= self::PER_IP_HOURLY ) {
-			return false;
-		}
-		set_transient( $key, $count + 1, HOUR_IN_SECONDS );
-
 		$daily = get_option( 'shso_rum_daily', array() );
 		$today = gmdate( 'Y-m-d' );
 		if ( ! is_array( $daily ) || ( $daily['date'] ?? '' ) !== $today ) {
@@ -92,9 +84,37 @@ final class Rum {
 		if ( (int) $daily['count'] >= (int) apply_filters( 'shso_rum_daily_cap', self::DAILY_CAP ) ) {
 			return false;
 		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$ip   = self::client_bucket( isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '' );
+		$hash = substr( hash( 'sha256', $ip . '|' . gmdate( 'YmdH' ) . '|' . wp_salt( 'nonce' ) ), 0, 16 );
+		$key  = 'shso_rum_' . $hash;
+
+		$count = (int) get_transient( $key );
+		if ( $count >= self::PER_IP_HOURLY ) {
+			return false;
+		}
+		set_transient( $key, $count + 1, HOUR_IN_SECONDS );
+
 		++$daily['count'];
 		update_option( 'shso_rum_daily', $daily, false );
 
 		return true;
+	}
+
+	/**
+	 * Rate-limit bucket of a client address: the address itself for IPv4, its /64 network for IPv6.
+	 *
+	 * @param string $ip Remote address.
+	 */
+	public static function client_bucket( string $ip ): string {
+		if ( false === filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ) {
+			return $ip;
+		}
+		$packed = inet_pton( $ip );
+		if ( false === $packed || 16 !== strlen( $packed ) ) {
+			return $ip;
+		}
+		return bin2hex( substr( $packed, 0, 8 ) ) . '::/64';
 	}
 }

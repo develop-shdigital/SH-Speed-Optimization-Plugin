@@ -38,6 +38,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class RestController {
 
+	/**
+	 * Largest critical CSS accepted from the browser (the stored limit is lower).
+	 */
+	private const MAX_CRITICAL_CSS_BYTES = 131072;
+
 	public const NAMESPACE = 'shso/v1';
 
 	/**
@@ -530,7 +535,17 @@ final class RestController {
 			if ( '' === $key || ! is_array( $result ) ) {
 				continue;
 			}
+			// Critical CSS must reach CriticalCssOptimization::store() intact (it sanitizes the
+			// CSS itself); sanitize_text_field() and the 600 character cap would corrupt it.
+			$css = null;
+			if ( isset( $result['critical_css'] ) && is_array( $result['critical_css'] ) && isset( $result['critical_css']['css'] ) && is_string( $result['critical_css']['css'] ) ) {
+				$css = $result['critical_css']['css'];
+				unset( $result['critical_css']['css'] );
+			}
 			$clean[ $key ] = self::clean_value( $result, 0 );
+			if ( null !== $css && is_array( $clean[ $key ]['critical_css'] ?? null ) ) {
+				$clean[ $key ]['critical_css']['css'] = strlen( $css ) <= self::MAX_CRITICAL_CSS_BYTES ? str_replace( "\0", '', $css ) : '';
+			}
 		}
 		return $clean;
 	}
@@ -1057,6 +1072,10 @@ final class RestController {
 		if ( ! class_exists( '\SH\SpeedOptimizer\Cache\Dropin' ) ) {
 			return new WP_Error( 'shso_unavailable', __( 'Not available.', 'sh-speed-optimizer' ), array( 'status' => 500 ) );
 		}
+		$blocked = Capabilities::server_files_blocked_reason();
+		if ( null !== $blocked ) {
+			return new WP_Error( 'shso_server_files', $blocked, array( 'status' => 403 ) );
+		}
 		if ( ! $this->plugin->state()->is_active( 'page_cache' ) ) {
 			return new WP_Error( 'shso_cache_off', __( 'Page caching is not active.', 'sh-speed-optimizer' ), array( 'status' => 409 ) );
 		}
@@ -1133,6 +1152,8 @@ final class RestController {
 				'psi_api_key_set' => $has_key,
 				'server'          => (string) ( $scan['profile']['server']['software'] ?? '' ),
 				'network'         => is_multisite(),
+				// Why server files may not be changed by this user ('' when they may).
+				'server_files'    => (string) Capabilities::server_files_blocked_reason(),
 			),
 		);
 	}
@@ -1155,6 +1176,12 @@ final class RestController {
 			}
 			if ( 'psi_api_key' === $key && '' === (string) $value ) {
 				continue; // Empty means "unchanged"; use clear_psi_api_key to remove.
+			}
+			if ( 'allow_server_config' === $key && ! empty( $value ) && empty( $this->plugin->settings()->get( 'allow_server_config' ) ) ) {
+				$blocked = Capabilities::server_files_blocked_reason();
+				if ( null !== $blocked ) {
+					return new WP_Error( 'shso_server_files', $blocked, array( 'status' => 403 ) );
+				}
 			}
 			$changes[ $key ] = $value;
 		}

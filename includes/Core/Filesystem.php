@@ -27,16 +27,24 @@ final class Filesystem {
 	 * Cache root (wp-content/cache/sh-speed-optimizer/).
 	 */
 	public static function cache_root(): string {
+		$default = wp_normalize_path( WP_CONTENT_DIR . '/cache/sh-speed-optimizer/' );
+
 		/**
-		 * Filters the cache root directory. Must stay inside wp-content.
+		 * Filters the cache root directory. Must be a dedicated directory inside
+		 * wp-content (it is emptied when the cache is cleared and on uninstall);
+		 * wp-content itself, cache/, uploads/ and code directories are refused.
 		 *
 		 * @param string $dir Directory with trailing slash.
 		 */
-		$dir = (string) apply_filters( 'shso_cache_dir', WP_CONTENT_DIR . '/cache/sh-speed-optimizer/' );
-		$dir = wp_normalize_path( trailingslashit( $dir ) );
+		$dir     = wp_normalize_path( trailingslashit( (string) apply_filters( 'shso_cache_dir', $default ) ) );
+		$content = wp_normalize_path( trailingslashit( WP_CONTENT_DIR ) );
 
-		if ( 0 !== strpos( $dir, wp_normalize_path( trailingslashit( WP_CONTENT_DIR ) ) ) || false !== strpos( $dir, '..' ) ) {
-			$dir = wp_normalize_path( WP_CONTENT_DIR . '/cache/sh-speed-optimizer/' );
+		if ( 0 !== strpos( $dir, $content ) || false !== strpos( $dir, '..' ) ) {
+			return $default;
+		}
+		$relative = substr( $dir, strlen( $content ) );
+		if ( in_array( $relative, array( '', 'cache/', 'uploads/' ), true ) || preg_match( '#^(plugins|mu-plugins|themes|languages|upgrade|upgrade-temp-backup)/#', $relative ) ) {
+			return $default;
 		}
 
 		return $dir;

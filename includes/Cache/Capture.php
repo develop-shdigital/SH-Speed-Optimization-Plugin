@@ -235,6 +235,7 @@ final class Capture {
 			'woocommerce'  => $ran && function_exists( 'is_cart' ) && ( is_cart() || ( function_exists( 'is_checkout' ) && is_checkout() ) || ( function_exists( 'is_account_page' ) && is_account_page() ) ),
 			'edd'          => $ran && function_exists( 'edd_is_checkout' ) && edd_is_checkout(),
 			'verification' => $context->is_verification(),
+			'tracking'     => ! empty( $this->decision['tracking'] ),
 			'safe_cookies' => (array) ( $site['safe_cookies'] ?? array() ),
 		);
 	}
@@ -249,6 +250,7 @@ final class Capture {
 
 		$checks = array(
 			'verification'   => ! empty( $facts['verification'] ),
+			'tracking_query' => ! empty( $facts['tracking'] ),
 			'status'         => 200 !== (int) ( $facts['status'] ?? 0 ),
 			'content_type'   => false === stripos( (string) ( $facts['content_type'] ?? 'text/html' ), 'text/html' ),
 			'too_small'      => strlen( $html ) <= 255,

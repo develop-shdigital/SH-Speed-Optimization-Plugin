@@ -100,6 +100,14 @@ final class Plugin {
 		// Multisite lifecycle.
 		add_action( 'wp_initialize_site', array( Installer::class, 'on_new_site' ), 200 );
 		add_filter( 'wpmu_drop_tables', array( Installer::class, 'drop_site_tables' ), 10, 2 );
+		// Deleted, archived, spam or deactivated sites must stop being served from the cache
+		// (the drop-in runs before WordPress checks the site status).
+		foreach ( array( 'wp_delete_site', 'make_spam_blog', 'archive_blog', 'deactivate_blog' ) as $hook ) {
+			add_action( $hook, array( $this, 'on_site_suspended' ) );
+		}
+		foreach ( array( 'make_ham_blog', 'unarchive_blog', 'activate_blog' ) as $hook ) {
+			add_action( $hook, array( $this, 'on_site_restored' ) );
+		}
 
 		// Settings affecting cached output purge the cache.
 		add_action( 'shso_settings_updated', array( $this, 'on_settings_updated' ), 10, 2 );
@@ -243,6 +251,36 @@ final class Plugin {
 	 */
 	public function admin_bar_action(): void {
 		( new \SH\SpeedOptimizer\Admin\AdminBar( $this ) )->handle();
+	}
+
+	/**
+	 * A site of the network was deleted or suspended: stop serving its cached pages.
+	 *
+	 * @param int|\WP_Site $site Site id or object.
+	 */
+	public function on_site_suspended( $site ): void {
+		$site = is_object( $site ) ? $site : get_site( (int) $site );
+		if ( $site instanceof \WP_Site ) {
+			$this->cache()->forget_site( $site );
+		}
+	}
+
+	/**
+	 * A suspended site is live again: regenerate its cache configuration if it uses the page cache.
+	 *
+	 * @param int $site_id Site id.
+	 */
+	public function on_site_restored( $site_id ): void {
+		$site_id = (int) $site_id;
+		if ( $site_id <= 0 || ! function_exists( 'switch_to_blog' ) ) {
+			return;
+		}
+		switch_to_blog( $site_id );
+		$state = get_option( State::OPTION );
+		if ( is_array( $state ) && isset( $state['active']['page_cache'] ) && ! wp_next_scheduled( CacheManager::CONFIG_HOOK ) ) {
+			wp_schedule_single_event( time(), CacheManager::CONFIG_HOOK );
+		}
+		restore_current_blog();
 	}
 
 	/**

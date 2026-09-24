@@ -158,7 +158,22 @@ function delete_transient( $name ) {
 	return delete_option( '_transient_' . $name );
 }
 function is_multisite() {
-	return false;
+	return ! empty( $GLOBALS['shso_test_multisite'] );
+}
+function get_current_blog_id() {
+	return (int) ( $GLOBALS['shso_test_blog_id'] ?? 1 );
+}
+/**
+ * Test sites: $GLOBALS['shso_test_sites'] = [ blog_id => path prefix ], longest prefix wins.
+ */
+function get_site_by_path( $domain, $path ) {
+	$best = null;
+	foreach ( (array) ( $GLOBALS['shso_test_sites'] ?? array( 1 => '/' ) ) as $id => $prefix ) {
+		if ( 0 === strpos( $path, $prefix ) && ( null === $best || strlen( $prefix ) > strlen( $best[1] ) ) ) {
+			$best = array( $id, $prefix );
+		}
+	}
+	return null === $best ? false : (object) array( 'blog_id' => (string) $best[0], 'path' => $best[1] );
 }
 function wp_salt( $scheme = 'auth' ) {
 	return 'test-salt-' . $scheme;
@@ -227,7 +242,7 @@ function is_user_logged_in() {
 	return false;
 }
 function current_user_can( $cap ) {
-	return false;
+	return in_array( $cap, (array) ( $GLOBALS['shso_test_caps'] ?? array() ), true );
 }
 function get_current_user_id() {
 	return 0;

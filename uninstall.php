@@ -37,7 +37,7 @@ function shso_uninstall_site(): void {
 	global $wpdb;
 
 	// Scheduled events.
-	foreach ( array( 'shso_cron_hourly', 'shso_cron_daily', 'shso_job_tick', 'shso_preload_batch', 'shso_generate_assets', 'shso_webp_batch', 'shso_localize_fonts', 'shso_facade_thumbs' ) as $hook ) {
+	foreach ( array( 'shso_cron_hourly', 'shso_cron_daily', 'shso_job_tick', 'shso_preload_batch', 'shso_generate_assets', 'shso_webp_batch', 'shso_localize_fonts', 'shso_facade_thumbs', 'shso_cache_write_config' ) as $hook ) {
 		wp_clear_scheduled_hook( $hook );
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions( $hook );

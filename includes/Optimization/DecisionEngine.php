@@ -15,6 +15,7 @@ namespace SH\SpeedOptimizer\Optimization;
 
 use SH\SpeedOptimizer\Core\Settings;
 use SH\SpeedOptimizer\Core\State;
+use SH\SpeedOptimizer\Security\Capabilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -125,8 +126,14 @@ final class DecisionEngine {
 
 		$requirements = $optimization->requirements();
 
-		if ( in_array( OptimizationInterface::REQ_SERVER_CONFIG, $requirements, true ) && ! $this->settings->get( 'allow_server_config' ) ) {
-			return $make( Decision::RECOMMEND, __( 'Needs your permission to add rules to the server configuration (.htaccess).', 'sh-speed-optimizer' ) );
+		if ( in_array( OptimizationInterface::REQ_SERVER_CONFIG, $requirements, true ) ) {
+			$blocked = Capabilities::server_files_blocked_reason( false );
+			if ( null !== $blocked ) {
+				return $make( Decision::SKIP, $blocked );
+			}
+			if ( ! $this->settings->get( 'allow_server_config' ) ) {
+				return $make( Decision::RECOMMEND, __( 'Needs your permission to add rules to the server configuration (.htaccess).', 'sh-speed-optimizer' ) );
+			}
 		}
 
 		if ( in_array( OptimizationInterface::REQ_EXTERNAL_DOWNLOAD, $requirements, true ) && ! $this->settings->get( 'localize_fonts' ) ) {

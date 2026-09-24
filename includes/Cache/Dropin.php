@@ -467,22 +467,71 @@ PHP;
 	/**
 	 * Write wp-config.php and verify it; restore the original on any doubt.
 	 *
+	 * The new contents are validated before anything is written, then swapped in
+	 * atomically where possible, so concurrent requests never read a partial file.
+	 *
 	 * @param string $path     File.
 	 * @param string $updated  New contents.
 	 * @param string $original Original contents.
 	 */
 	private static function write_verified( string $path, string $updated, string $original ): bool {
-		$written = @file_put_contents( $path, $updated, LOCK_EX );
-		clearstatcache( true, $path );
-		$check = @file_get_contents( $path );
+		if ( false === strpos( $updated, 'wp-settings.php' ) || ! self::is_valid_php( $updated ) ) {
+			return false;
+		}
+		$target = realpath( $path );
+		$target = false === $target ? $path : $target; // A symlinked wp-config.php keeps its link.
 
-		if ( strlen( $updated ) !== $written || $check !== $updated || false === strpos( (string) $check, 'wp-settings.php' ) || ! self::is_valid_php( (string) $check ) ) {
-			@file_put_contents( $path, $original, LOCK_EX );
-			self::invalidate_opcache( $path );
+		if ( ! self::replace_atomically( $target, $updated ) ) {
+			$written = @file_put_contents( $target, $updated, LOCK_EX );
+			if ( strlen( $updated ) !== $written ) {
+				@file_put_contents( $target, $original, LOCK_EX );
+				self::invalidate_opcache( $target );
+				return false;
+			}
+		}
+		clearstatcache( true, $target );
+		$check = @file_get_contents( $target );
+
+		if ( $check !== $updated ) {
+			if ( ! self::replace_atomically( $target, $original ) ) {
+				@file_put_contents( $target, $original, LOCK_EX );
+			}
+			self::invalidate_opcache( $target );
 			return false;
 		}
 
-		self::invalidate_opcache( $path );
+		self::invalidate_opcache( $target );
+		return true;
+	}
+
+	/**
+	 * Replace a file by writing a temporary file next to it and renaming it over the original.
+	 *
+	 * Only used when the file belongs to the user PHP runs as (renaming would otherwise
+	 * change its owner) and its directory is writable. The temporary file ends in .php so
+	 * a web server never serves its contents as text during the moment it exists.
+	 *
+	 * @param string $target   File.
+	 * @param string $contents Contents.
+	 */
+	private static function replace_atomically( string $target, string $contents ): bool {
+		$dir = dirname( $target );
+		if ( ! is_file( $target ) || ! is_writable( $dir ) || ! function_exists( 'posix_geteuid' ) || @fileowner( $target ) !== posix_geteuid() ) {
+			return false;
+		}
+		$tmp = $dir . '/wp-config-shso-' . bin2hex( random_bytes( 8 ) ) . '.php';
+		if ( strlen( $contents ) !== @file_put_contents( $tmp, $contents, LOCK_EX ) ) {
+			@unlink( $tmp );
+			return false;
+		}
+		$perms = @fileperms( $target );
+		if ( false !== $perms ) {
+			@chmod( $tmp, $perms & 0777 );
+		}
+		if ( ! @rename( $tmp, $target ) ) {
+			@unlink( $tmp );
+			return false;
+		}
 		return true;
 	}
 

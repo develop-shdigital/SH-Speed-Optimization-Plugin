@@ -387,9 +387,10 @@ final class Scanner implements JobHandlerInterface {
 						'j' => $job->id(),
 					)
 				);
-				$signed  = \SH\SpeedOptimizer\Security\Signer::sign( $payload, 1800 );
-				$data    = \SH\SpeedOptimizer\Security\Signer::verify( $signed );
-				$plan[]  = array(
+				// Outlives JobManager::BROWSER_TIMEOUT (600 s), no longer.
+				$signed = \SH\SpeedOptimizer\Security\Signer::sign( $payload, 900 );
+				$data   = \SH\SpeedOptimizer\Security\Signer::verify( $signed );
+				$plan[] = array(
 					'key'        => $prefix . ':' . $index . ':' . $vp_key,
 					'url'        => add_query_arg(
 						array(

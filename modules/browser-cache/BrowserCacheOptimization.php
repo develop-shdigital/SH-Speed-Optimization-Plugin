@@ -18,6 +18,7 @@ use SH\SpeedOptimizer\Optimization\AssessmentContext;
 use SH\SpeedOptimizer\Optimization\Category;
 use SH\SpeedOptimizer\Optimization\Risk;
 use SH\SpeedOptimizer\Optimization\Runtime;
+use SH\SpeedOptimizer\Security\Capabilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -162,6 +163,10 @@ final class BrowserCacheOptimization extends AbstractOptimization {
 	 * {@inheritDoc}
 	 */
 	public function apply() {
+		$blocked = Capabilities::server_files_blocked_reason( false );
+		if ( null !== $blocked ) {
+			return new \WP_Error( 'shso_server_files', $blocked );
+		}
 		if ( ! $this->plugin->settings()->get( 'allow_server_config', false ) ) {
 			return new \WP_Error( 'shso_browser_cache_permission', __( 'Browser caching needs your permission to add rules to the server configuration (.htaccess).', 'sh-speed-optimizer' ) );
 		}

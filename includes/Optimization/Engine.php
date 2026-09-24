@@ -26,6 +26,7 @@ use SH\SpeedOptimizer\Diagnostics\HealthScore;
 use SH\SpeedOptimizer\Diagnostics\Loopback;
 use SH\SpeedOptimizer\Diagnostics\Scanner;
 use SH\SpeedOptimizer\Diagnostics\Verifier;
+use SH\SpeedOptimizer\Security\Capabilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -273,7 +274,7 @@ final class Engine implements JobHandlerInterface {
 			if ( $job->arg( 'manual' ) && Decision::RECOMMEND === $decision->action && null === $assessment->handled_by && null === $assessment->blocked && $assessment->applicable ) {
 				$allowed = Risk::LEVEL_EXPERIMENTAL !== $optimization->level() || $this->plugin->settings()->get( 'advanced_optimizations' );
 				$needs   = $optimization->requirements();
-				if ( in_array( OptimizationInterface::REQ_SERVER_CONFIG, $needs, true ) && ! $this->plugin->settings()->get( 'allow_server_config' ) ) {
+				if ( in_array( OptimizationInterface::REQ_SERVER_CONFIG, $needs, true ) && ( ! $this->plugin->settings()->get( 'allow_server_config' ) || null !== Capabilities::server_files_blocked_reason( false ) ) ) {
 					$allowed = false;
 				}
 				if ( in_array( OptimizationInterface::REQ_EXTERNAL_DOWNLOAD, $needs, true ) && ! $this->plugin->settings()->get( 'localize_fonts' ) ) {

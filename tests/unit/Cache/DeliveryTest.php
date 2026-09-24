@@ -159,6 +159,8 @@ final class DeliveryTest extends TestCase {
 		$this->assertSame( 'cache', $tracked['action'] );
 		$this->assertSame( $plain['dir'] . $plain['file'], $tracked['dir'] . $tracked['file'] );
 		$this->assertSame( 'https://example.test/about/', $tracked['url'] );
+		$this->assertTrue( $tracked['tracking'], 'Pages rendered with tracking parameters are served from the cache but never stored.' );
+		$this->assertFalse( $plain['tracking'] );
 	}
 
 	public function test_unknown_query_parameters_bypass(): void {

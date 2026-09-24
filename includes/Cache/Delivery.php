@@ -67,6 +67,7 @@ final class Delivery {
 		'edd_cart',
 		'wp-resetpass-',
 		'wordpress_no_cache',
+		'PHPSESSID', // A PHP session may personalise pages without setting a cookie in the same response.
 	);
 
 	/**
@@ -263,7 +264,8 @@ final class Delivery {
 	 * Returned keys: action (cache|bypass), reason (bypass reason code), host,
 	 * prefix (matched site path prefix), site_key, site (site config), dir
 	 * (directory below pages/), file (variant file name), url, https, mobile,
-	 * variant (https, slash, mobile, query, vary cookie names).
+	 * variant (https, slash, mobile, query, vary cookie names), tracking (ignored
+	 * tracking parameters were present: serve from the cache, never store).
 	 *
 	 * @param array<string,mixed> $server  $_SERVER-like array.
 	 * @param array<string,mixed> $cookies $_COOKIE-like array.
@@ -285,6 +287,7 @@ final class Delivery {
 			'https'    => self::is_https( $server ),
 			'mobile'   => false,
 			'variant'  => array(),
+			'tracking' => false,
 		);
 
 		$host = self::normalize_host( (string) ( $server['HTTP_HOST'] ?? '' ) );
@@ -350,6 +353,9 @@ final class Delivery {
 				continue;
 			}
 			if ( in_array( $lower, $ignore, true ) ) {
+				// Served from the cache, but never stored: WordPress still sees the parameter
+				// and may copy it into the page (pagination links, form fields).
+				$result['tracking'] = true;
 				continue;
 			}
 			return self::bypass( $result, 'query' );

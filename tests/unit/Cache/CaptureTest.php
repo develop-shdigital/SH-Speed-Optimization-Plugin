@@ -71,6 +71,7 @@ final class CaptureTest extends TestCase {
 			'woocommerce'    => array( 'woocommerce' => true ),
 			'edd'            => array( 'edd' => true ),
 			'verification'   => array( 'verification' => true ),
+			'tracking_query' => array( 'tracking' => true ),
 		);
 		foreach ( $cases as $reason => $overrides ) {
 			$this->assertSame( $reason, Capture::store_decision( $this->facts( $overrides ) ), $reason );
